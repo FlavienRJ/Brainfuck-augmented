@@ -14,3 +14,4 @@ Project for the course "Analysis of programming language" at Taltech university 
 - [ ] output
 - [ ] datatype int and float
 - [ ] array
+- [ ] bubble sort or any other example programm
