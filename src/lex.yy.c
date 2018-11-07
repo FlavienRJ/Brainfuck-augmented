@@ -1,6 +1,7 @@
-#line 2 "simplang.l"
-#include "simplang.h"
-#include "simplang.tab.h"
+#line 2 "taltech-lang.l"
+#include "taltech-lang.h"
+#include "taltech-lang.tab.h"
+
 
 
 #line 8 "lex.yy.c"
@@ -509,7 +510,7 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "simplang.l"
+#line 1 "taltech-lang.l"
 
 
 #line 517 "lex.yy.c"
@@ -695,7 +696,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 11 "simplang.l"
+#line 11 "taltech-lang.l"
 
 
 #line 703 "lex.yy.c"
@@ -793,79 +794,79 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 13 "simplang.l"
+#line 13 "taltech-lang.l"
 { return IF; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 14 "simplang.l"
+#line 14 "taltech-lang.l"
 { return ELSE; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 15 "simplang.l"
+#line 15 "taltech-lang.l"
 { return ENDIF; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 16 "simplang.l"
+#line 16 "taltech-lang.l"
 { return WHILE; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 17 "simplang.l"
+#line 17 "taltech-lang.l"
 { return READ; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 18 "simplang.l"
+#line 18 "taltech-lang.l"
 { return PRINT; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 19 "simplang.l"
+#line 19 "taltech-lang.l"
 { yylval.var = findVar(yytext); return VAR; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 20 "simplang.l"
+#line 20 "taltech-lang.l"
 { yylval.val = atoi(yytext); return NUM; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 21 "simplang.l"
+#line 21 "taltech-lang.l"
 { BEGIN(STRING); }
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 22 "simplang.l"
+#line 22 "taltech-lang.l"
 { yylval.s = strdup(yytext); return STR; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 23 "simplang.l"
+#line 23 "taltech-lang.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 24 "simplang.l"
+#line 24 "taltech-lang.l"
 { return *yytext; } 
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 25 "simplang.l"
+#line 25 "taltech-lang.l"
 ;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 26 "simplang.l"
+#line 26 "taltech-lang.l"
 ;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 28 "simplang.l"
+#line 28 "taltech-lang.l"
 ECHO;
 	YY_BREAK
 #line 873 "lex.yy.c"
@@ -1878,6 +1879,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 28 "simplang.l"
+#line 28 "taltech-lang.l"
 
 
