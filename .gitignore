@@ -51,5 +51,10 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# Mac files
+# MAC OS X files
 .DS_Store
+
+# Intermediate files
+build/*
+src/*.tab.*
+src/lex.*
