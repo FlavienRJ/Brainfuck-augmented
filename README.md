@@ -8,6 +8,10 @@ Project for the course "Analysis of programming language" at Taltech university 
 - We can get some ideas from other language : a list (non-exhaustive) with hello-world example https://github.com/leachim6/hello-world
 - function of iterator point on the value of the last result
 
+## Parse an existing language
+- Real language : LISP or F\#
+- Otherwise : Brainfuck or one of them https://esolangs.org/wiki/Truth-machine
+
 ## Description language
 
 extension : *.tf
