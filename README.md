@@ -12,6 +12,23 @@ Project for the course "Analysis of programming language" at Taltech university 
 - Real language : LISP or F\#
 - Otherwise : Brainfuck or one of them https://esolangs.org/wiki/Truth-machine
 
+Implementation of  
+- an interpreter
+- a compiler (translate code to C and compile it)
+- visualization tool step by step of what's happen on the tape to help debuging
+
+Why ?
+- Fully Turing-complete
+- Help to understand Turing machine
+
+- [Wikipedia link](https://en.wikipedia.org/wiki/Brainfuck)
+- [Esolangs link](https://en.wikipedia.org/wiki/Brainfuck)
+- [Bublesort in bf](http://99-bottles-of-beer.net/language-brainfuck-2542.html)
+
+## Description of the language
+
+extension : *.bfa
+
 ### Brainfuck augmented
 - \# : comment line
 - \> : move pointer to the right (ptr++)
@@ -26,22 +43,7 @@ Project for the course "Analysis of programming language" at Taltech university 
 - \; : end procedure
 - Why not function with a new tape. The last value of this tape is returned at the end of function.
 
-Implementation of  
-- an interpreter
-- a compiler (translate code to C and compile it)
-- visualization tool step by step of what's happen on the tape to help debuging
-
-Why ?
-- Fully Turing-complete
-- Help to understant Turing machine
-
-- [Wikipedia link](https://en.wikipedia.org/wiki/Brainfuck)
-- [Esolangs link](https://en.wikipedia.org/wiki/Brainfuck)
-- [Bublesort in bf](http://99-bottles-of-beer.net/language-brainfuck-2542.html)
-
-## Description language
-
-extension : *.tf
+##
 
 
 ## What we need to implement
