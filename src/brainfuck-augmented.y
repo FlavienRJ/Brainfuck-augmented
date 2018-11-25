@@ -1,5 +1,5 @@
 %{
-#include "taltech-lang.h"
+#include "brainfuck-augmented.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

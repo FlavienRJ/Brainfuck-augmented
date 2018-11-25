@@ -1,5 +1,5 @@
 #!/bin/bash
-cd src && flex taltech-lang.l &&\
-bison -d taltech-lang.y &&\
-gcc *.c -o ../build/taltech-lang && cd .. &&\
-chmod +x build/taltech-lang
+cd src && flex brainfuck-augmented.l &&\
+bison -d brainfuck-augmented.y &&\
+gcc *.c -o ../build/brainfuck-augmented && cd .. &&\
+chmod +x build/brainfuck-augmented

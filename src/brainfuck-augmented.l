@@ -1,6 +1,6 @@
 %top{
-#include "taltech-lang.h"
-#include "taltech-lang.tab.h"
+#include "brainfuck-augmented.h"
+#include "brainfuck-augmented.tab.h"
 }
 
 %option noyywrap
