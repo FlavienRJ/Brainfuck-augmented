@@ -59,4 +59,5 @@ extension : *.bfa
 ## Todo list
 - [ ] Define the syntax
 - [ ] Write a parse
-- [ ] Write interpreter
+- [ ] Write an interpreter
+- [ ] Write a compiler

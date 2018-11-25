@@ -6,22 +6,24 @@
 %option noyywrap
 %option yylineno
 %option case-insensitive
-%x STRING
-
 %%
 
-"IF"			{ return IF; }
-"ELSE"			{ return ELSE; }
-"ENDIF"			{ return ENDIF; }
-"WHILE"			{ return WHILE; }
-"READ"			{ return READ; }
-"PRINT"			{ return PRINT; }
-[a-z][a-z0-9]*		{ yylval.var = findVar(yytext); return VAR; }
-[0-9]+			{ yylval.val = atoi(yytext); return NUM; }
-\"			{ BEGIN(STRING); }
-<STRING>[^\"]+		{ yylval.s = strdup(yytext); return STR; }
-<STRING>\"		{ BEGIN(INITIAL); }
-[\+\*\-\/()={};] 	{ return *yytext; } 
+"\#"			; //Comments
+"\>"            { return MRIGHT; }
+"\>"            { return MLEFT; }
+"\+"            { return ADD; }
+"\-"            { return MINUS; }
+"\."            { return PRINT; }
+"\,"            { return INPUT; }
+"\["            { BEGIN(LOOP); }
+<LOOP>"\]"      {   if(!getVal()) 
+                    { 
+                        BEGIN(INITIAL);
+                    }
+                } //not sure about it, getVal to define   
+"\:"            { BEGIN(PROCEDURE); }
+<PROCEDURE>[A-Z]           { yylval.s = return PROCNAME; } 
+<PROCEDURE>"\;"     {BEGIN(INITIAL); }
 \n			;
 .			;
 
