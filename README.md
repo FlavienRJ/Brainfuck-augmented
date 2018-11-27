@@ -47,17 +47,15 @@ extension : *.bfa
 
 
 ## What we need to implement
-- [ ] assignment, function calls
+- [ ] procedure
 - [ ] loops
 - [ ] conditional statements
 - [ ] input
 - [ ] output
-- [ ] datatype int and float
-- [ ] array
 - [ ] comment
 
 ## Todo list
-- [ ] Define the syntax
-- [ ] Write a parse
+- [ ] Write a parser
 - [ ] Write an interpreter
 - [ ] Write a compiler
+- [ ] Visualization tool
