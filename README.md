@@ -52,10 +52,22 @@ extension : *.bfa
 - [ ] conditional statements
 - [ ] input
 - [ ] output
+<<<<<<< HEAD
+=======
+- [ ] datatype int and float
+- [ ] array
+<<<<<<< HEAD
+- [ ] bubble sort or any other example programm
+=======
+>>>>>>> 6516d9e10403f938e4ecefe00a6996c1ad4d5044
 - [ ] comment
 
 ## Todo list
 - [ ] Write a parser
 - [ ] Write an interpreter
 - [ ] Write a compiler
+<<<<<<< HEAD
 - [ ] Visualization tool
+=======
+>>>>>>> 1200e6c5cf61d133c7b8a6b85403cb660ef95bf5
+>>>>>>> 6516d9e10403f938e4ecefe00a6996c1ad4d5044
