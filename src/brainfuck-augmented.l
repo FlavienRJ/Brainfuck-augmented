@@ -18,7 +18,7 @@
 "\["            { return LOOP; }
 "\]"            { return END_LOOP; } //not sure about it, getVal to define   
 "\:"            { return PROCEDURE; }
-[A-Z]           { yylval.procname = yytext; return PROCNAME; } 
+[A-Z]           { yylval.procname = yytext[0]; return PROCNAME; } 
 "\;"            { return END_PROCEDURE; }
 \n			;
 .			;

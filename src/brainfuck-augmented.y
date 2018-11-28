@@ -11,7 +11,7 @@ void yyerror(const char *s);
 %}
 
 %union{
-	char *procname;
+	char procname;
 }
 
 %error-verbose
@@ -21,12 +21,19 @@ void yyerror(const char *s);
 
 //Rules
 %%
-program : stmts {}
+program : stmts { printf("End statement\n"); }
 		;
-stmts : stmt {  }
-	| stmts stmt '\n' { printf("End statement\n"); }
+stmts : stmt  
+	| stmts stmt  
 	;
-stmt : ADD { printf("Add\n"); }
+stmt : MRIGHT { printf("go right\n"); }
+	| MLEFT { printf("go left\n"); }
+	| ADD { printf("add\n"); }
+	| MINUS { printf("decrease\n"); }
+	| OUTPUT { printf("print\n"); }
+	| INPUT { printf("read\n"); }
+	| LOOP stmts END_LOOP { printf("loop\n"); }
+	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("procedure %c\n", $2); }
 	;
 %%
 
@@ -47,61 +54,80 @@ int main(int argc, char **argv){
 	int visualisation = 0;
 	int interpreter = 1; //by default, use interpreter
 		//if the option is -i then we want an interpreter
-	if (!strcmp(argv[i], "-i"))
+	int file = 0;
+	if (i < argc)
 	{
-		i++;
-		if (i < argc)
+		if (strcmp(argv[i], "-i") == 0)
 		{
-			if (!strcmp(argv[i], "-v"))
+			i++;
+			if (i < argc)
 			{
-				visualisation = 1;
-			} 
-			else
-			{
-				strcpy(filename, argv[i]);
-				i++;
-				if (i < argc)
+				if (!strcmp(argv[i], "-v"))
 				{
-					if (!strcmp(argv[i], "-v"))
+					visualisation = 1;
+				} 
+				else
+				{
+					strcpy(filename, argv[i]);
+					file = 1;
+					i++;
+					if (i < argc)
 					{
-						visualisation = 1;
-					} 
+						if (!strcmp(argv[i], "-v"))
+						{
+							visualisation = 1;
+						} 
+					}
 				}
 			}
 		}
-	}
-	//if the option is -c then we want to compile the file
-	else if (!strcmp(argv[i], "-c"))
-	{
-		i++;
-		if (i >= argc)
+		//if the option is -c then we want to compile the file
+		else if (!strcmp(argv[i], "-c"))
 		{
-			printf("No source file to compile!\n");
-			return -1;
-		}
-		else
-		{
-			//case ./brainfuck-augmented -c -v
-			if (strcmp(argv[i], "-v") || strcmp(argv[i], "-i"))
+			i++;
+			if (i >= argc)
 			{
-				printf("Wrong order in arguments, needed a file name given an option!\n");
+				printf("No source file to compile!\n");
 				return -1;
 			}
 			else
 			{
-				strcpy(filename, argv[i]);
-			}
-			i++;
-			if (i < argc)
-			{
-				//We want the visualisation tool
-				if (!strcmp(argv[i], "-v"))
+				//case ./brainfuck-augmented -c -v
+				if (strcmp(argv[i], "-v") || strcmp(argv[i], "-i"))
 				{
-					visualisation = 1;
+					printf("Wrong order in arguments, needed a file name given an option!\n");
+					return -1;
+				}
+				else
+				{
+					strcpy(filename, argv[i]);
+					file = 1;
+				}
+				i++;
+				if (i < argc)
+				{
+					//We want the visualisation tool
+					if (!strcmp(argv[i], "-v"))
+					{
+						visualisation = 1;
+					}
 				}
 			}
+			interpreter = 0;
 		}
-		interpreter = 0;
+		else
+		{
+			printf("A");
+		}
+	}
+	if (file)
+	{
+		yyin = fopen(filename, "r");
+		if(yyin == NULL)
+		{
+			printf("Error opening %s", filename);
+			return -1;
+		}
 	}
 	yyparse();
 	fclose(yyin);
