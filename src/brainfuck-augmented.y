@@ -19,6 +19,7 @@ void yyerror(const char *s);
 %token LOOP END_LOOP PROCEDURE END_PROCEDURE
 %token <procname> PROCNAME
 
+//Rules
 %%
 program : stmts {}
 		;
@@ -41,6 +42,67 @@ int main(int argc, char **argv){
 	/*yyin = fopen(argv[1], "r");
 	if(yyin == NULL)
 		return -1;	*/
+	int i = 1;
+	char filename[30];
+	int visualisation = 0;
+	int interpreter = 1; //by default, use interpreter
+		//if the option is -i then we want an interpreter
+	if (!strcmp(argv[i], "-i"))
+	{
+		i++;
+		if (i < argc)
+		{
+			if (!strcmp(argv[i], "-v"))
+			{
+				visualisation = 1;
+			} 
+			else
+			{
+				strcpy(filename, argv[i]);
+				i++;
+				if (i < argc)
+				{
+					if (!strcmp(argv[i], "-v"))
+					{
+						visualisation = 1;
+					} 
+				}
+			}
+		}
+	}
+	//if the option is -c then we want to compile the file
+	else if (!strcmp(argv[i], "-c"))
+	{
+		i++;
+		if (i >= argc)
+		{
+			printf("No source file to compile!\n");
+			return -1;
+		}
+		else
+		{
+			//case ./brainfuck-augmented -c -v
+			if (strcmp(argv[i], "-v") || strcmp(argv[i], "-i"))
+			{
+				printf("Wrong order in arguments, needed a file name given an option!\n");
+				return -1;
+			}
+			else
+			{
+				strcpy(filename, argv[i]);
+			}
+			i++;
+			if (i < argc)
+			{
+				//We want the visualisation tool
+				if (!strcmp(argv[i], "-v"))
+				{
+					visualisation = 1;
+				}
+			}
+		}
+		interpreter = 0;
+	}
 	yyparse();
 	fclose(yyin);
 	return 0;
