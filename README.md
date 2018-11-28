@@ -24,6 +24,7 @@ Why ?
 - [Wikipedia link](https://en.wikipedia.org/wiki/Brainfuck)
 - [Esolangs link](https://en.wikipedia.org/wiki/Brainfuck)
 - [Bublesort in bf](http://99-bottles-of-beer.net/language-brainfuck-2542.html)
+- [Examples of programs in bf](http://rosettacode.org/wiki/Category:Brainf***)
 
 ## Description of the language
 
