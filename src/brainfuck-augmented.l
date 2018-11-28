@@ -10,20 +10,16 @@
 
 "\#"			; //Comments
 "\>"            { return MRIGHT; }
-"\>"            { return MLEFT; }
+"\<"            { return MLEFT; }
 "\+"            { return ADD; }
 "\-"            { return MINUS; }
-"\."            { return PRINT; }
+"\."            { return OUTPUT; }
 "\,"            { return INPUT; }
-"\["            { BEGIN(LOOP); }
-<LOOP>"\]"      {   if(!getVal()) 
-                    { 
-                        BEGIN(INITIAL);
-                    }
-                } //not sure about it, getVal to define   
-"\:"            { BEGIN(PROCEDURE); }
-<PROCEDURE>[A-Z]           { yylval.s = return PROCNAME; } 
-<PROCEDURE>"\;"     {BEGIN(INITIAL); }
+"\["            { return LOOP; }
+"\]"            { return END_LOOP; } //not sure about it, getVal to define   
+"\:"            { return PROCEDURE; }
+[A-Z]           { yylval.procname = yytext; return PROCNAME; } 
+"\;"            { return END_PROCEDURE; }
 \n			;
 .			;
 
