@@ -42,9 +42,8 @@ extension : *.bfa
 - \:A : start new procedure A (void A(ptr){)
 - \; : end procedure
 - Why not function with a new tape. The last value of this tape is returned at the end of function.
-
-##
-
+- Builtin functions like convert number to ascii number, add 57 to convert to ascii,...
+- Arguments for the program. Ex ./brainfuck -i test.tf 1 2 3 4 5 will write 1 2 3 4 5 on the first 5 cells of the tape
 
 ## What we need to implement
 - [ ] procedure
@@ -52,22 +51,11 @@ extension : *.bfa
 - [ ] conditional statements
 - [ ] input
 - [ ] output
-<<<<<<< HEAD
-=======
-- [ ] datatype int and float
-- [ ] array
-<<<<<<< HEAD
 - [ ] bubble sort or any other example programm
-=======
->>>>>>> 6516d9e10403f938e4ecefe00a6996c1ad4d5044
 - [ ] comment
 
 ## Todo list
 - [ ] Write a parser
 - [ ] Write an interpreter
 - [ ] Write a compiler
-<<<<<<< HEAD
 - [ ] Visualization tool
-=======
->>>>>>> 1200e6c5cf61d133c7b8a6b85403cb660ef95bf5
->>>>>>> 6516d9e10403f938e4ecefe00a6996c1ad4d5044
