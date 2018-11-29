@@ -24,6 +24,9 @@ void cinput();
 void mloop();
 void newproc();
 void callproc();
+
+int TAPE[LEN_TAPE] = {0};
+int* head;
 %}
 
 %union{
@@ -42,12 +45,12 @@ program : stmts { printf("End statement\n"); }
 stmts : stmt  
 	| stmts stmt  
 	;
-stmt : MRIGHT { printf("go right\n"); }
-	| MLEFT { printf("go left\n"); }
-	| ADD { printf("add\n"); }
-	| MINUS { printf("decrease\n"); }
-	| OUTPUT { printf("print\n"); }
-	| INPUT { printf("read\n"); }
+stmt : MRIGHT { printf("go right\n"); mright(); }
+	| MLEFT { printf("go left\n"); mleft(); }
+	| ADD { printf("add\n"); cadd(); }
+	| MINUS { printf("decrease\n"); cminus(); }
+	| OUTPUT { printf("print\n"); coutput(); }
+	| INPUT { printf("read\n"); cinput(); }
 	| LOOP stmts END_LOOP { printf("loop\n"); }
 	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("new procedure %c\n", $2); }
 	| PROCNAME { printf("call procedure %c\n", $1); }
@@ -113,7 +116,48 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
+	init();
 	yyparse();
 	fclose(yyin);
 	return 0;
 }
+
+void init()
+{
+	head = &TAPE[512];
+	printf("%d : %d", head, *head);
+}
+
+void mright()
+{
+	head++;
+}
+
+void mleft()
+{
+	head--;
+}
+
+void cadd()
+{
+	(*head)++;
+}
+
+void cminus()
+{
+	(*head)--;
+}
+
+void coutput()
+{
+	putchar(*head);
+}
+
+void cinput()
+{
+	scanf("%d", head);
+}
+
+void mloop();
+void newproc();
+void callproc();
