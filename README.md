@@ -16,6 +16,7 @@ Implementation of
 - an interpreter
 - a compiler (translate code to C and compile it)
 - visualization tool step by step of what's happen on the tape to help debuging
+- debug mode to output the nodes, the size of used cells in tape,...
 
 Why ?
 - Fully Turing-complete

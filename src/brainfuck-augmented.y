@@ -8,6 +8,11 @@ extern int yylex(void);
 extern int yylineno;
 extern FILE *yyin;
 void yyerror(const char *s);
+
+int visualisation = 0;
+int interpreter = 1; 
+int debug = 0;
+int file = 0;
 %}
 
 %union{
@@ -41,83 +46,50 @@ void yyerror(const char *s){
 	printf("ERROR: %s at line %d\n", s, yylineno); 
 }
 
-int main(int argc, char **argv){
-	/*if(argc < 2){
-		printf("No file to parse!\n");
-		return -1;
-	}*/
-	/*yyin = fopen(argv[1], "r");
-	if(yyin == NULL)
-		return -1;	*/
-	int i = 1;
+int main(int argc, char **argv)
+{
+	int i;
 	char filename[30];
-	int visualisation = 0;
-	int interpreter = 1; //by default, use interpreter
-		//if the option is -i then we want an interpreter
-	int file = 0;
-	if (i < argc)
+	
+	for (i=1; i < argc; i++)
 	{
+		//interpreter
 		if (strcmp(argv[i], "-i") == 0)
 		{
-			i++;
-			if (i < argc)
+			if (argv[i+1] != NULL)
 			{
-				if (!strcmp(argv[i], "-v"))
-				{
-					visualisation = 1;
-				} 
-				else
-				{
-					strcpy(filename, argv[i]);
-					file = 1;
-					i++;
-					if (i < argc)
-					{
-						if (!strcmp(argv[i], "-v"))
-						{
-							visualisation = 1;
-						} 
-					}
-				}
+				strcpy(filename, argv[i]);
+				file = 1;
 			}
 		}
-		//if the option is -c then we want to compile the file
+		//compiler
 		else if (!strcmp(argv[i], "-c"))
 		{
-			i++;
-			if (i >= argc)
+			interpreter = 0;
+			if (argv[i+1] != NULL)
+			{
+				strcpy(filename, argv[i]);
+				file = 1;
+			}
+			else
 			{
 				printf("No source file to compile!\n");
 				return -1;
 			}
-			else
-			{
-				//case ./brainfuck-augmented -c -v
-				if (strcmp(argv[i], "-v") || strcmp(argv[i], "-i"))
-				{
-					printf("Wrong order in arguments, needed a file name given an option!\n");
-					return -1;
-				}
-				else
-				{
-					strcpy(filename, argv[i]);
-					file = 1;
-				}
-				i++;
-				if (i < argc)
-				{
-					//We want the visualisation tool
-					if (!strcmp(argv[i], "-v"))
-					{
-						visualisation = 1;
-					}
-				}
-			}
-			interpreter = 0;
+		}
+		//visualisation
+		else if (!strcmp(argv[i], "-v"))
+		{
+			visualisation = 1;
+		}
+		//debug
+		else if (!strcmp(argv[i], "-d"))
+		{
+			debug = 1;
 		}
 		else
 		{
-			printf("A");
+			continue;
 		}
 	}
 	if (file)
