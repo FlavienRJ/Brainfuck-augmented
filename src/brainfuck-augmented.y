@@ -13,6 +13,17 @@ int visualisation = 0;
 int interpreter = 1; 
 int debug = 0;
 int file = 0;
+
+void init();
+void mright();
+void mleft();
+void cadd();
+void cminus();
+void coutput();
+void cinput();
+void mloop();
+void newproc();
+void callproc();
 %}
 
 %union{
@@ -38,7 +49,8 @@ stmt : MRIGHT { printf("go right\n"); }
 	| OUTPUT { printf("print\n"); }
 	| INPUT { printf("read\n"); }
 	| LOOP stmts END_LOOP { printf("loop\n"); }
-	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("procedure %c\n", $2); }
+	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("new procedure %c\n", $2); }
+	| PROCNAME { printf("call procedure %c\n", $1); }
 	;
 %%
 
