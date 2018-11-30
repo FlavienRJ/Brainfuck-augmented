@@ -22,11 +22,16 @@ void cminus();
 void coutput();
 void cinput();
 void mloop();
+void mloopend();
 void newproc();
 void callproc();
 
 int TAPE[LEN_TAPE] = {0};
 int* head;
+
+int counter = 0;
+int loop_stack_counter = 0;
+int loop_stack[64];
 %}
 
 %union{
@@ -45,15 +50,15 @@ program : stmts { printf("End statement\n"); }
 stmts : stmt  
 	| stmts stmt  
 	;
-stmt : MRIGHT { printf("go right\n"); mright(); }
-	| MLEFT { printf("go left\n"); mleft(); }
-	| ADD { printf("add\n"); cadd(); }
-	| MINUS { printf("decrease\n"); cminus(); }
-	| OUTPUT { printf("print\n"); coutput(); }
-	| INPUT { printf("read\n"); cinput(); }
-	| LOOP stmts END_LOOP { printf("loop\n"); }
-	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("new procedure %c\n", $2); }
-	| PROCNAME { printf("call procedure %c\n", $1); }
+stmt : MRIGHT { printf("[%d] go right\n", counter); mright(); counter++; }
+	| MLEFT { printf("[%d] go left\n", counter); mleft(); counter++; }
+	| ADD { printf("[%d] add\n", counter); cadd(); counter++; }
+	| MINUS { printf("[%d] decrease\n", counter); cminus(); counter++; }
+	| OUTPUT { printf("[%d] print\n", counter); coutput(); counter++; }
+	| INPUT { printf("[%d] read\n", counter); cinput(); counter++; }
+	| LOOP stmts END_LOOP { printf("[%d] loop\n", counter); mloop(); counter++; }
+	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("[%d] new procedure %c\n", counter, $2); counter++; }
+	| PROCNAME { printf("[%d] call procedure %c\n", counter, $1); counter++; }
 	;
 %%
 
@@ -73,7 +78,7 @@ int main(int argc, char **argv)
 		{
 			if (argv[i+1] != NULL)
 			{
-				strcpy(filename, argv[i]);
+				strcpy(filename, argv[i+1]);
 				file = 1;
 			}
 		}
@@ -83,7 +88,7 @@ int main(int argc, char **argv)
 			interpreter = 0;
 			if (argv[i+1] != NULL)
 			{
-				strcpy(filename, argv[i]);
+				strcpy(filename, argv[i+1]);
 				file = 1;
 			}
 			else
@@ -109,6 +114,7 @@ int main(int argc, char **argv)
 	}
 	if (file)
 	{
+		//problem with name with - on
 		yyin = fopen(filename, "r");
 		if(yyin == NULL)
 		{
@@ -116,6 +122,7 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
+	printf("A\n");
 	init();
 	yyparse();
 	fclose(yyin);
@@ -158,6 +165,16 @@ void cinput()
 	scanf("%d", head);
 }
 
-void mloop();
+void mloop()
+{
+	loop_stack[loop_stack_counter] = counter;
+	counter++;
+}
+
+void mloopend()
+{
+	
+}
+
 void newproc();
 void callproc();
