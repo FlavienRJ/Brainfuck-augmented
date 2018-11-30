@@ -15,7 +15,7 @@ int debug = 0;
 int file = 0;
 
 int TAPE[TAPE_SIZE] = {0};
-int* HEAD;
+int HEAD;
 
 int IC = 0; //Instruction Counter
 
@@ -29,25 +29,26 @@ int SP = 0; //Stack pointer
 }
 
 %error-verbose
-%token MRIGHT MLEFT ADD MINUS OUTPUT INPUT 
+%token MRIGHT MLEFT ADD MINUS OUTPUT INPUT END
 %token LOOP END_LOOP PROCEDURE END_PROCEDURE
 %token <procname> PROCNAME
 
 //Rules
 %%
-program : stmts { printf("End statement\n"); endprog(); }
+program : stmts END 
 		;
-stmts : stmt  
-	| stmts stmt  
+stmts : stmt
+	| stmts stmt 
+	| stmts END { printf("End statement\n"); endprog(); YYACCEPT; }
 	;
-stmt : MRIGHT { printf("[%d] go right\n", IC); mright(); IC++; }
-	| MLEFT { printf("[%d] go left\n", IC); mleft(); IC++; }
-	| ADD { printf("[%d] add\n", IC); cadd(); IC++; }
-	| MINUS { printf("[%d] decrease\n", IC); cminus(); IC++; }
-	| OUTPUT { printf("[%d] print\n", IC); coutput(); IC++; }
-	| INPUT { printf("[%d] read\n", IC); cinput(); IC++; }
-	| LOOP { printf("[%d] loop\n", IC); mloop(); IC++; }
-	| END_LOOP { printf("[%d] end loop\n", IC); mloopend(); IC++; }
+stmt : MRIGHT {  mright(); IC++; }
+	| MLEFT {  mleft(); IC++; }
+	| ADD {  cadd(); IC++; }
+	| MINUS {  cminus(); IC++; }
+	| OUTPUT { coutput(); IC++; }
+	| INPUT {  cinput(); IC++; }
+	| LOOP {  mloop(); IC++; }
+	| END_LOOP {  mloopend(); IC++; }
 	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("[%d] new procedure %c\n", IC, $2); IC++; }
 	| PROCNAME { printf("[%d] call procedure %c\n", IC, $1); IC++; }
 	;
@@ -113,17 +114,17 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
-	printf("A\n");
 	init();
 	yyparse();
 	fclose(yyin);
+	execute();
 	return 0;
 }
 
 void init()
 {
-	HEAD = &TAPE[512];
-	printf("%d : %d", HEAD, *HEAD);
+	HEAD = 512;
+	printf("[Ox%d] : %d\n", &TAPE[HEAD], TAPE[HEAD]);
 }
 
 void spush(int a)
@@ -138,18 +139,18 @@ int spop()
 
 int sempty()
 {
-	if SP {
-		return SUCCESS;
-	} else {
+	if(SP==0) {
 		return FAILURE;
+	} else {
+		return SUCCESS;
 	}		
 }
 int sfull()
 {
 	if (SP==STACK_SIZE) {
-		return SUCCESS;
-	} else {
 		return FAILURE;
+	} else {
+		return SUCCESS;
 	}
 }
 
@@ -187,7 +188,7 @@ void mloop()
 {
 	PROGRAM[IC].operator = OP_LOOP;
 	if (sfull()) {
-		return FAILURE;
+		exit(FAILURE);
 	} else {
 		spush(IC);
 	}
@@ -196,7 +197,7 @@ void mloop()
 void mloopend()
 {
 	if (sempty()) {
-		return FAILURE;
+		exit(FAILURE);
 	} else {
 		int tmp_pc = spop();
 		PROGRAM[IC].operator = OP_END_LOOP;
@@ -211,4 +212,36 @@ void callproc();
 void endprog()
 {
 	PROGRAM[IC].operator = OP_END;
+}
+
+int execute()
+{
+	IC = 0;
+	while (PROGRAM[IC].operator != OP_END && HEAD < TAPE_SIZE && HEAD > 0)
+	{
+		switch (PROGRAM[IC].operator)
+		{
+			case OP_MRIGHT: printf("\n[%d] go right\n", IC); HEAD++; break;
+			case OP_MLEFT: printf("\n[%d] go left\n", IC); HEAD--; break;
+			case OP_ADD: printf("\n[%d] add\n", IC); TAPE[HEAD]++; break;
+			case OP_MINUS: printf("\n[%d] decrease\n", IC); TAPE[HEAD]--; break;
+			case OP_OUTPUT: printf("\n[%d] print\n", IC); putchar(TAPE[HEAD]); break;
+			case OP_INPUT: printf("\n[%d] read\n", IC); TAPE[HEAD] = (int)getchar(); break;
+			case OP_LOOP: 
+				printf("\n[%d] loop\n", IC);
+				if(!TAPE[HEAD]) {
+					IC = PROGRAM[IC].argument;
+				}
+				break;
+			case OP_END_LOOP:
+				printf("\n[%d] end loop\n", IC);
+				if(TAPE[HEAD]) {
+					IC = PROGRAM[IC].argument;
+				}
+				break; 
+			default: return FAILURE;
+		}
+		IC++;
+	}
+	return SUCCESS;
 }

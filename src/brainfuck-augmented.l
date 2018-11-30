@@ -20,7 +20,7 @@
 "\:"            { return PROCEDURE; }
 [A-Z]           { yylval.procname = yytext[0]; return PROCNAME; } 
 "\;"            { return END_PROCEDURE; }
-\n			;
+"\n"            { return END; }
 .			;
 
 %%
