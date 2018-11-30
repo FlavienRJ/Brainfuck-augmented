@@ -1,6 +1,7 @@
+//CONSTANT
 #define TAPE_SIZE 1024
 #define STACK_SIZE 128
-#define DATA_SIZE 65535
+#define PROGRAM_SIZE 4096
 
 #define OP_END      0
 #define OP_MRIGHT   1
@@ -20,3 +21,30 @@ extern int visualisation;
 extern int interpreter; 
 extern int debug;
 extern int file;
+
+//STRUCT
+typedef struct _instruction {
+    unsigned short operator;
+    unsigned short argument;
+} t_instruction;
+
+//FUNCTIONS
+void spush(int a);
+int spop();
+int sempty();
+int sfull();
+
+void init();
+void mright();
+void mleft();
+void cadd();
+void cminus();
+void coutput();
+void cinput();
+void mloop();
+void mloopend();
+void newproc();
+void callproc();
+void endprog();
+
+int execute();

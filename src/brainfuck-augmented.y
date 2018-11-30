@@ -14,24 +14,14 @@ int interpreter = 1;
 int debug = 0;
 int file = 0;
 
-void init();
-void mright();
-void mleft();
-void cadd();
-void cminus();
-void coutput();
-void cinput();
-void mloop();
-void mloopend();
-void newproc();
-void callproc();
+int TAPE[TAPE_SIZE] = {0};
+int* HEAD;
 
-int TAPE[LEN_TAPE] = {0};
-int* head;
+int IC = 0; //Instruction Counter
 
-int counter = 0;
-int loop_stack_counter = 0;
-int loop_stack[64];
+t_instruction PROGRAM[PROGRAM_SIZE];
+int STACK[STACK_SIZE];
+int SP = 0; //Stack pointer
 %}
 
 %union{
@@ -45,20 +35,21 @@ int loop_stack[64];
 
 //Rules
 %%
-program : stmts { printf("End statement\n"); }
+program : stmts { printf("End statement\n"); endprog(); }
 		;
 stmts : stmt  
 	| stmts stmt  
 	;
-stmt : MRIGHT { printf("[%d] go right\n", counter); mright(); counter++; }
-	| MLEFT { printf("[%d] go left\n", counter); mleft(); counter++; }
-	| ADD { printf("[%d] add\n", counter); cadd(); counter++; }
-	| MINUS { printf("[%d] decrease\n", counter); cminus(); counter++; }
-	| OUTPUT { printf("[%d] print\n", counter); coutput(); counter++; }
-	| INPUT { printf("[%d] read\n", counter); cinput(); counter++; }
-	| LOOP stmts END_LOOP { printf("[%d] loop\n", counter); mloop(); counter++; }
-	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("[%d] new procedure %c\n", counter, $2); counter++; }
-	| PROCNAME { printf("[%d] call procedure %c\n", counter, $1); counter++; }
+stmt : MRIGHT { printf("[%d] go right\n", IC); mright(); IC++; }
+	| MLEFT { printf("[%d] go left\n", IC); mleft(); IC++; }
+	| ADD { printf("[%d] add\n", IC); cadd(); IC++; }
+	| MINUS { printf("[%d] decrease\n", IC); cminus(); IC++; }
+	| OUTPUT { printf("[%d] print\n", IC); coutput(); IC++; }
+	| INPUT { printf("[%d] read\n", IC); cinput(); IC++; }
+	| LOOP { printf("[%d] loop\n", IC); mloop(); IC++; }
+	| END_LOOP { printf("[%d] end loop\n", IC); mloopend(); IC++; }
+	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("[%d] new procedure %c\n", IC, $2); IC++; }
+	| PROCNAME { printf("[%d] call procedure %c\n", IC, $1); IC++; }
 	;
 %%
 
@@ -131,50 +122,93 @@ int main(int argc, char **argv)
 
 void init()
 {
-	head = &TAPE[512];
-	printf("%d : %d", head, *head);
+	HEAD = &TAPE[512];
+	printf("%d : %d", HEAD, *HEAD);
+}
+
+void spush(int a)
+{
+	STACK[SP++] = a;
+}
+
+int spop()
+{
+	return STACK[--SP];
+}
+
+int sempty()
+{
+	if SP {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}		
+}
+int sfull()
+{
+	if (SP==STACK_SIZE) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
 }
 
 void mright()
 {
-	head++;
+	PROGRAM[IC].operator = OP_MRIGHT;
 }
 
 void mleft()
 {
-	head--;
+	PROGRAM[IC].operator = OP_MLEFT;
 }
 
 void cadd()
 {
-	(*head)++;
+	PROGRAM[IC].operator = OP_ADD;
 }
 
 void cminus()
 {
-	(*head)--;
+	PROGRAM[IC].operator = OP_MINUS;
 }
 
 void coutput()
 {
-	putchar(*head);
+	PROGRAM[IC].operator = OP_OUTPUT;
 }
 
 void cinput()
 {
-	scanf("%d", head);
+	PROGRAM[IC].operator = OP_INPUT;
 }
 
 void mloop()
 {
-	loop_stack[loop_stack_counter] = counter;
-	counter++;
+	PROGRAM[IC].operator = OP_LOOP;
+	if (sfull()) {
+		return FAILURE;
+	} else {
+		spush(IC);
+	}
 }
 
 void mloopend()
 {
-	
+	if (sempty()) {
+		return FAILURE;
+	} else {
+		int tmp_pc = spop();
+		PROGRAM[IC].operator = OP_END_LOOP;
+		PROGRAM[IC].argument = tmp_pc;
+		PROGRAM[tmp_pc].argument = IC;
+	}
 }
 
 void newproc();
 void callproc();
+
+void endprog()
+{
+	PROGRAM[IC].operator = OP_END;
+}
