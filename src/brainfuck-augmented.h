@@ -48,3 +48,5 @@ void callproc();
 void endprog();
 
 int execute();
+void cleanprog();
+void cleantape();

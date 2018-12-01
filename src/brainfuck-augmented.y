@@ -35,11 +35,11 @@ int SP = 0; //Stack pointer
 
 //Rules
 %%
-program : stmts END 
+program : stmts 
 		;
 stmts : stmt
 	| stmts stmt 
-	| stmts END { printf("End statement\n"); endprog(); YYACCEPT; }
+	| stmts END { endprog(); execute(); cleanprog(); }
 	;
 stmt : MRIGHT {  mright(); IC++; }
 	| MLEFT {  mleft(); IC++; }
@@ -53,7 +53,7 @@ stmt : MRIGHT {  mright(); IC++; }
 	| PROCNAME { printf("[%d] call procedure %c\n", IC, $1); IC++; }
 	;
 %%
-
+//think about a better version than YYACCEPT because of difference interpreter/file
 void yyerror(const char *s){
 	printf("ERROR: %s at line %d\n", s, yylineno); 
 }
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 void init()
 {
 	HEAD = 512;
-	printf("[Ox%d] : %d\n", &TAPE[HEAD], TAPE[HEAD]);
+	if(debug) {printf("[Ox%d] : %d\n", &TAPE[HEAD], TAPE[HEAD]);}
 }
 
 void spush(int a)
@@ -221,20 +221,25 @@ int execute()
 	{
 		switch (PROGRAM[IC].operator)
 		{
-			case OP_MRIGHT: printf("\n[%d] go right\n", IC); HEAD++; break;
-			case OP_MLEFT: printf("\n[%d] go left\n", IC); HEAD--; break;
-			case OP_ADD: printf("\n[%d] add\n", IC); TAPE[HEAD]++; break;
-			case OP_MINUS: printf("\n[%d] decrease\n", IC); TAPE[HEAD]--; break;
-			case OP_OUTPUT: printf("\n[%d] print\n", IC); putchar(TAPE[HEAD]); break;
-			case OP_INPUT: printf("\n[%d] read\n", IC); TAPE[HEAD] = (int)getchar(); break;
+			case OP_MRIGHT: if(debug) {printf("\n[%d] go right\n", IC);} HEAD++; break;
+			case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", IC);} HEAD--; break;
+			case OP_ADD: if(debug) {printf("\n[%d] add\n", IC);} TAPE[HEAD]++; break;
+			case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", IC);} TAPE[HEAD]--; break;
+			case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", IC);} putchar(TAPE[HEAD]); break;
+			//I think there is a problem with the reading from the stdin
+			case OP_INPUT: 
+				if(debug) {printf("\n[%d] read\n", IC);}
+				//fflush(); //error to reading but i am to tired to fix it
+				TAPE[HEAD] = (int)getchar();
+				break;
 			case OP_LOOP: 
-				printf("\n[%d] loop\n", IC);
+				if(debug) {printf("\n[%d] loop\n", IC);}
 				if(!TAPE[HEAD]) {
 					IC = PROGRAM[IC].argument;
 				}
 				break;
 			case OP_END_LOOP:
-				printf("\n[%d] end loop\n", IC);
+				if(debug) {printf("\n[%d] end loop\n", IC);}
 				if(TAPE[HEAD]) {
 					IC = PROGRAM[IC].argument;
 				}
@@ -244,4 +249,15 @@ int execute()
 		IC++;
 	}
 	return SUCCESS;
+}
+
+void cleanprog()
+{
+	IC = 0;
+	memset(PROGRAM, 0, sizeof(PROGRAM));
+}
+void cleantape()
+{
+	HEAD = 512;
+	memset(TAPE, 0, sizeof(TAPE));
 }
