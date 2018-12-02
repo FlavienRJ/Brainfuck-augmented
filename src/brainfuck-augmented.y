@@ -22,6 +22,9 @@ int IC = 0; //Instruction Counter
 t_instruction PROGRAM[PROGRAM_SIZE];
 int STACK[STACK_SIZE];
 int SP = 0; //Stack pointer
+t_fn_instruction PROC[STACK_SIZE];
+int PP = 0;
+int inProc = 0; //if 1 then put the instruction in the buffer of the procedure of PROC[PP]
 %}
 
 %union{
@@ -49,8 +52,9 @@ stmt : MRIGHT {  mright(); IC++; }
 	| INPUT {  cinput(); IC++; }
 	| LOOP {  mloop(); IC++; }
 	| END_LOOP {  mloopend(); IC++; }
-	| PROCEDURE PROCNAME stmts END_PROCEDURE { printf("[%d] new procedure %c\n", IC, $2); IC++; }
-	| PROCNAME { printf("[%d] call procedure %c\n", IC, $1); IC++; }
+	| PROCEDURE PROCNAME { newproc($2); IC++; }
+	| END_PROCEDURE { endproc(); IC++; }
+	| PROCNAME { callproc($1); IC++; }
 	;
 %%
 //think about a better version than YYACCEPT because of difference interpreter/file
@@ -156,36 +160,81 @@ int sfull()
 
 void mright()
 {
+	if (inProc)
+		PROC[PP].size++;
 	PROGRAM[IC].operator = OP_MRIGHT;
 }
 
 void mleft()
 {
-	PROGRAM[IC].operator = OP_MLEFT;
+	if (inProc)
+	{
+		PROC[PP].PROC_INSTR[PROC[PP].size].operator = OP_MLEFT;
+		PROC[PP].size++;
+	}
+	else
+	{
+		PROGRAM[IC].operator = OP_MLEFT;
+	}
+	
 }
 
 void cadd()
 {
-	PROGRAM[IC].operator = OP_ADD;
+	if (inProc)
+	{
+		PROC[PP].PROC_INSTR[PROC[PP].size].operator = OP_ADD;
+		PROC[PP].size++;
+	}
+	else
+	{
+		PROGRAM[IC].operator = OP_ADD;
+	}
 }
 
 void cminus()
 {
-	PROGRAM[IC].operator = OP_MINUS;
+	if (inProc)
+	{
+		PROC[PP].PROC_INSTR[PROC[PP].size].operator = OP_MINUS;
+		PROC[PP].size++;
+	}
+	else
+	{
+		PROGRAM[IC].operator = OP_MINUS;
+	}
 }
 
 void coutput()
 {
-	PROGRAM[IC].operator = OP_OUTPUT;
+	if (inProc)
+	{
+		PROC[PP].PROC_INSTR[PROC[PP].size].operator = OP_OUTPUT;
+		PROC[PP].size++;
+	}
+	else
+	{
+		PROGRAM[IC].operator = OP_OUTPUT;
+	}
 }
 
 void cinput()
 {
-	PROGRAM[IC].operator = OP_INPUT;
+	if (inProc)
+	{
+		PROC[PP].PROC_INSTR[PROC[PP].size].operator = OP_INPUT;
+		PROC[PP].size++;
+	}
+	else
+	{
+		PROGRAM[IC].operator = OP_INPUT;
+	}
 }
 
 void mloop()
 {
+	if (inProc)
+		PROC[PP].size++;
 	PROGRAM[IC].operator = OP_LOOP;
 	if (sfull()) {
 		exit(FAILURE);
@@ -196,6 +245,8 @@ void mloop()
 
 void mloopend()
 {
+	if (inProc)
+		PROC[PP].size++;
 	if (sempty()) {
 		exit(FAILURE);
 	} else {
@@ -203,11 +254,33 @@ void mloopend()
 		PROGRAM[IC].operator = OP_END_LOOP;
 		PROGRAM[IC].argument = tmp_pc;
 		PROGRAM[tmp_pc].argument = IC;
-	}
+	}		
 }
 
-void newproc();
-void callproc();
+void newproc(char procname)
+{
+	inProc = 1;
+	PROGRAM[IC].operator = OP_NEW_PROC;
+	PROGRAM[IC].name = procname;
+	PROC[PP].name = procname;
+	PROC[PP].IC_begin = IC + 1;
+	PROC[PP].size = 0;
+	
+	//t_instruction* instr = malloc(128 * sizeof(t_instruction));
+}
+
+void endproc()
+{
+	PROGRAM[IC].operator = OP_END_PROC;
+	inProc = 0;	
+	PP++;
+}
+
+void callproc(char procname)
+{
+	PROGRAM[IC].operator = OP_CALL_PROC;
+	PROGRAM[IC].name = procname;
+}
 
 void endprog()
 {
@@ -244,11 +317,66 @@ int execute()
 					IC = PROGRAM[IC].argument;
 				}
 				break; 
+			case OP_NEW_PROC:
+				if(debug) {printf("\n[%d] new proc : %c\n", IC, PROGRAM[IC].name);}
+				break;
+			case OP_END_PROC:
+				break;
+			case OP_CALL_PROC:
+				if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[IC].name);}
+				executeproc(PROGRAM[IC].name);
+				break;
+
 			default: return FAILURE;
 		}
 		IC++;
 	}
 	return SUCCESS;
+}
+
+void executeproc(char procname)
+{
+	int i = 0;
+	if(debug) { printf("\n[%d] executeproc: %c\n", IC, procname);}
+	int k,l;
+	for (k = 0; k < PP; k++)
+	{
+		printf("procname = %c\n", PROC[k].name);
+		for (l=0; l < PROC[k].size; l++)
+		{
+			printf ("\tOp code : %d\n", PROC[k].PROC_INSTR[l].operator);
+		}
+	}
+	for (i = 0; i < PP; i++)
+	{
+		if (PROC[i].name == procname)
+		{
+			if(debug) {printf("Procedure %c found\n", procname); }
+			int j;
+			for (j = 0; j < PROC[i].size; j++)
+			{
+				//Need to do in other way
+				switch (PROC[i].PROC_INSTR[j].operator)
+				{
+					case OP_MRIGHT: if(debug) {printf("\n[%d] go right\n", IC);} HEAD++; break;
+					case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", IC);} HEAD--; break;
+					case OP_ADD: if(debug) {printf("\n[%d] add\n", IC);} TAPE[HEAD]++; break;
+					case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", IC);} TAPE[HEAD]--; break;
+					case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", IC);} putchar(TAPE[HEAD]); break;
+					//I think there is a problem with the reading from the stdin
+					case OP_INPUT: 
+						if(debug) {printf("\n[%d] read\n", IC);}
+						//fflush(); //error to reading but i am to tired to fix it
+						TAPE[HEAD] = (int)getchar();
+						break;	
+					default:
+						break;	
+				}		
+			}
+			return;
+		}
+	}
+	printf("Procedure %c does not exist\n",procname);
 }
 
 void cleanprog()
