@@ -261,12 +261,18 @@ void newproc(char procname)
 {
 	inProc = 1;
 	PROGRAM[IC].operator = OP_NEW_PROC;
+	//check if the name is already given
 	PROGRAM[IC].name = procname;
 	PROC[PP].name = procname;
 	PROC[PP].IC_begin = IC + 1;
 	PROC[PP].size = 0;
 	
 	//t_instruction* instr = malloc(128 * sizeof(t_instruction));
+}
+
+int findProcname(char procname)
+{
+	return 1;
 }
 
 void endproc()
@@ -292,61 +298,75 @@ int execute()
 	IC = 0;
 	while (PROGRAM[IC].operator != OP_END && HEAD < TAPE_SIZE && HEAD > 0)
 	{
-		switch (PROGRAM[IC].operator)
+		if (executeInstr(PROGRAM[IC],IC) == FAILURE)
 		{
-			case OP_MRIGHT: if(debug) {printf("\n[%d] go right\n", IC);} HEAD++; break;
-			case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", IC);} HEAD--; break;
-			case OP_ADD: if(debug) {printf("\n[%d] add\n", IC);} TAPE[HEAD]++; break;
-			case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", IC);} TAPE[HEAD]--; break;
-			case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", IC);} putchar(TAPE[HEAD]); break;
-			//I think there is a problem with the reading from the stdin
-			case OP_INPUT: 
-				if(debug) {printf("\n[%d] read\n", IC);}
-				//fflush(); //error to reading but i am to tired to fix it
-				TAPE[HEAD] = (int)getchar();
-				break;
-			case OP_LOOP: 
-				if(debug) {printf("\n[%d] loop\n", IC);}
-				if(!TAPE[HEAD]) {
-					IC = PROGRAM[IC].argument;
-				}
-				break;
-			case OP_END_LOOP:
-				if(debug) {printf("\n[%d] end loop\n", IC);}
-				if(TAPE[HEAD]) {
-					IC = PROGRAM[IC].argument;
-				}
-				break; 
-			case OP_NEW_PROC:
-				if(debug) {printf("\n[%d] new proc : %c\n", IC, PROGRAM[IC].name);}
-				break;
-			case OP_END_PROC:
-				break;
-			case OP_CALL_PROC:
-				if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[IC].name);}
-				executeproc(PROGRAM[IC].name);
-				break;
-
-			default: return FAILURE;
+			printf("Error during execution of instruction [%d]\n",IC);
+			return FAILURE;
 		}
 		IC++;
 	}
 	return SUCCESS;
 }
 
-void executeproc(char procname)
+int executeInstr(t_instruction instr, int ic)
+{
+	switch (instr.operator)
+	{
+		case OP_MRIGHT: if(debug) {printf("\n[%d] go right\n", ic);} HEAD++; break;
+		case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", ic);} HEAD--; break;
+		case OP_ADD: if(debug) {printf("\n[%d] add\n", ic);} TAPE[HEAD]++; break;
+		case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", ic);} TAPE[HEAD]--; break;
+		case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);} putchar(TAPE[HEAD]); break;
+		//I think there is a problem with the reading from the stdin
+		case OP_INPUT: 
+			if(debug) {printf("\n[%d] read\n", ic);}
+			//fflush(); //error to reading but i am to tired to fix it
+			TAPE[HEAD] = (int)getchar();
+			break;
+		case OP_LOOP: 
+			if(debug) {printf("\n[%d] loop\n", ic);}
+			if(!TAPE[HEAD]) {
+				IC = PROGRAM[IC].argument;
+			}
+			break;
+		case OP_END_LOOP:
+			if(debug) {printf("\n[%d] end loop\n", ic);}
+			if(TAPE[HEAD]) {
+				IC = PROGRAM[IC].argument;
+			}
+			break; 
+		case OP_NEW_PROC:
+			if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
+			break;
+		case OP_END_PROC:
+			break;
+		case OP_CALL_PROC:
+			if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
+			executeproc(PROGRAM[IC].name);
+			break;
+
+		default: return FAILURE;
+	}
+	return SUCCESS;
+}
+
+int executeproc(char procname)
 {
 	int i = 0;
-	if(debug) { printf("\n[%d] executeproc: %c\n", IC, procname);}
-	int k,l;
-	for (k = 0; k < PP; k++)
-	{
-		printf("procname = %c\n", PROC[k].name);
-		for (l=0; l < PROC[k].size; l++)
+	if(debug) 
+	{ 
+		printf("\n[%d] executeproc: %c\n", IC, procname);
+		int k,l;
+		for (k = 0; k < PP; k++)
 		{
-			printf ("\tOp code : %d\n", PROC[k].PROC_INSTR[l].operator);
+			printf("procname = %c\n", PROC[k].name);
+			for (l=0; l < PROC[k].size; l++)
+			{
+				printf ("\tOp code : %d\n", PROC[k].PROC_INSTR[l].operator);
+			}
 		}
 	}
+
 	for (i = 0; i < PP; i++)
 	{
 		if (PROC[i].name == procname)
@@ -355,28 +375,17 @@ void executeproc(char procname)
 			int j;
 			for (j = 0; j < PROC[i].size; j++)
 			{
-				//Need to do in other way
-				switch (PROC[i].PROC_INSTR[j].operator)
+				if (executeInstr(PROC[i].PROC_INSTR[j],j) == FAILURE)
 				{
-					case OP_MRIGHT: if(debug) {printf("\n[%d] go right\n", IC);} HEAD++; break;
-					case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", IC);} HEAD--; break;
-					case OP_ADD: if(debug) {printf("\n[%d] add\n", IC);} TAPE[HEAD]++; break;
-					case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", IC);} TAPE[HEAD]--; break;
-					case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", IC);} putchar(TAPE[HEAD]); break;
-					//I think there is a problem with the reading from the stdin
-					case OP_INPUT: 
-						if(debug) {printf("\n[%d] read\n", IC);}
-						//fflush(); //error to reading but i am to tired to fix it
-						TAPE[HEAD] = (int)getchar();
-						break;	
-					default:
-						break;	
-				}		
+					printf("Error during execution of instruction [%d] in procedure %c\n",j,PROC[i].name);
+					return FAILURE;
+				}	
 			}
-			return;
+			return SUCCESS;
 		}
 	}
 	printf("Procedure %c does not exist\n",procname);
+	return FAILURE;
 }
 
 void cleanprog()

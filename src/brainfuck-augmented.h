@@ -57,9 +57,11 @@ void mloopend();
 void newproc(char procname);
 void endproc();
 void callproc(char procname);
+int findProcname(char procname);
 void endprog();
 
 int execute();
-void executeproc(char procname);
+int executeInstr(t_instruction instr, int ic);
+int executeproc(char procname);
 void cleanprog();
 void cleantape();
