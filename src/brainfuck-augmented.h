@@ -38,7 +38,7 @@ typedef struct _fn_instruction {
     unsigned short size;
     t_instruction PROC_INSTR[256]; //maybe change to dynamic allocation
     int stack[STACK_SIZE];
-    int stack_size = 0;
+    int stack_size;
 } t_fn_instruction;
 
 //FUNCTIONS

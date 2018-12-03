@@ -16,10 +16,12 @@
 "\."            { return OUTPUT; }
 "\,"            { return INPUT; }
 "\["            { return LOOP; }
-"\]"            { return END_LOOP; } //not sure about it, getVal to define   
+"\]"            { return END_LOOP; } //not sure about it, getVal to define  
 "\:"            { return PROCEDURE; }
 [A-Z]           { yylval.procname = yytext[0]; return PROCNAME; } 
 "\;"            { return END_PROCEDURE; }
+"\$"            { return CLEAN; }
+"\@"            { return GOTO; }
 "\n"            { return END; }
 .			;
 

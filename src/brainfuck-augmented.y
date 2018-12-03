@@ -34,6 +34,7 @@ int inProc = 0; //if 1 then put the instruction in the buffer of the procedure o
 %error-verbose
 %token MRIGHT MLEFT ADD MINUS OUTPUT INPUT END
 %token LOOP END_LOOP PROCEDURE END_PROCEDURE
+%token CLEAN GOTO
 %token <procname> PROCNAME
 
 //Rules
@@ -55,9 +56,9 @@ stmt : MRIGHT {  mright(); IC++; }
 	| PROCEDURE PROCNAME { newproc($2); IC++; }
 	| END_PROCEDURE { endproc(); IC++; }
 	| PROCNAME { callproc($1); IC++; }
+	| CLEAN { if(debug){printf("clean tape by user\n"); } cleantape(); }
 	;
 %%
-//think about a better version than YYACCEPT because of difference interpreter/file
 void yyerror(const char *s){
 	printf("ERROR: %s at line %d\n", s, yylineno); 
 }
@@ -328,7 +329,7 @@ int executeInstr(t_instruction instr, int ic)
 	{
 		case OP_MRIGHT: if(debug) {printf("\n[%d] go right\n", ic);} HEAD++; break;
 		case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", ic);} HEAD--; break;
-		case OP_ADD: if(debug) {printf("\n[%d] add\n", ic);} TAPE[HEAD]++; break;
+		case OP_ADD: if(debug) {printf("\n[%d] increase\n", ic);} TAPE[HEAD]++; break;
 		case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", ic);} TAPE[HEAD]--; break;
 		case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);} putchar(TAPE[HEAD]); break;
 		//I think there is a problem with the reading from the stdin
