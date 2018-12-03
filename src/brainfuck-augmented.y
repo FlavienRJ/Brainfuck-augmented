@@ -434,12 +434,38 @@ void tape_visualisation()
 		printf("Empty tape\n");
 		return;
 	}
-	printf("|");
-	while (TAPE[i] != 0 && i < TAPE_SIZE)
+	char middle[256];
+	char top_bot[256];
+
+	if(i==0)
 	{
-		printf(" %d |", TAPE[i]);
-		i++;
+		strcat(middle,"\n|");
 	}
-	printf("\n");
-	
+	else
+	{
+		strcat(middle,"\n| ... |");
+	}	
+	while (i < TAPE_SIZE)
+	{
+		if (TAPE[i] == 0)
+		{
+			strcat(middle," ... |");
+			while (TAPE[i] == 0 && i < TAPE_SIZE)
+				i++;
+		}
+		else
+		{
+			char buf[8];
+			strcat(middle," ");
+			sprintf(buf, "%d",TAPE[i]);
+			strcat(middle, buf);
+			strcat(middle," |");
+			i++;
+		}
+	}
+	for (i = 0; i < strlen(middle); i++)
+		top_bot[i] = '-';
+	printf("%s\n", top_bot);
+	printf("%s\n", middle);
+	printf("%s\n", top_bot);
 }
