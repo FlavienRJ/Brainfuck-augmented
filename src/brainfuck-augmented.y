@@ -271,7 +271,7 @@ void mloopend()
 
 void newproc(char procname)
 {
-	if(findProcname(procname) == SUCCESS)
+	if(findProcname(procname) >= 0)
 	{
 		printf("procedure %c already exists\n", procname);
 		inProc = 0;
@@ -296,10 +296,10 @@ int findProcname(char procname)
 	{
 		if (PROC[i].name == procname)
 		{
-			return SUCCESS;
+			return i;
 		}
 	}
-	return FAILURE;
+	return -1;
 }
 
 void endproc()
@@ -397,8 +397,8 @@ int executeproc(char procname)
 			}
 		}
 	}
-
-	if(findProcname(procname) == SUCCESS)
+	i = findProcname(procname);
+	if( i >= 0)
 	{
 		if(debug) {printf("Procedure %c found\n", procname); }
 		int j;
