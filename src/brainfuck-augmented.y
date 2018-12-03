@@ -184,7 +184,6 @@ void mleft()
 	{
 		PROGRAM[IC].operator = OP_MLEFT;
 	}
-	
 }
 
 void cadd()
@@ -272,22 +271,34 @@ void mloopend()
 
 void newproc(char procname)
 {
-	inProc = 1;
-	PROGRAM[IC].operator = OP_NEW_PROC;
-	//check if the name is already given
-	PROGRAM[IC].name = procname;
-	PROC[PP].name = procname;
-	PROC[PP].IC_begin = IC + 1;
-	PROC[PP].size = 0;
-	PROC[PP].stack_size = 0; 
-	
+	if(findProcname(procname) == SUCCESS)
+	{
+		printf("procedure %c already exists\n", procname);
+	}
+	else
+	{
+		inProc = 1;
+		PROGRAM[IC].operator = OP_NEW_PROC;
+		PROGRAM[IC].name = procname;
+		PROC[PP].name = procname;
+		PROC[PP].IC_begin = IC + 1;
+		PROC[PP].size = 0;
+		PROC[PP].stack_size = 0; 
+	}
 	//t_instruction* instr = malloc(128 * sizeof(t_instruction));
 }
 
 int findProcname(char procname)
 {
-
-	return 1;
+	int i = 0;
+	for (i = 0; i < PP; i++)
+	{
+		if (PROC[i].name == procname)
+		{
+			return SUCCESS;
+		}
+	}
+	return FAILURE;
 }
 
 void endproc()
@@ -382,25 +393,23 @@ int executeproc(char procname)
 		}
 	}
 
-	for (i = 0; i < PP; i++)
+	if(findProcname(procname) == SUCCESS)
 	{
-		if (PROC[i].name == procname)
+		if(debug) {printf("Procedure %c found\n", procname); }
+		int j;
+		for (j = 0; j < PROC[i].size; j++)
 		{
-			if(debug) {printf("Procedure %c found\n", procname); }
-			int j;
-			for (j = 0; j < PROC[i].size; j++)
+			if (executeInstr(PROC[i].PROC_INSTR[j],j) == FAILURE)
 			{
-				if (executeInstr(PROC[i].PROC_INSTR[j],j) == FAILURE)
-				{
-					printf("Error during execution of instruction [%d] in procedure %c\n",j,PROC[i].name);
-					return FAILURE;
-				}	
-			}
-			return SUCCESS;
+				printf("Error during execution of instruction [%d] in procedure %c\n",j,PROC[i].name);
+				return FAILURE;
+			}	
 		}
+		return SUCCESS;
 	}
 	printf("Procedure %c does not exist\n",procname);
 	return FAILURE;
+
 }
 
 void cleanprog()
