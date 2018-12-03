@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 
 void init()
 {
-	HEAD = 512;
+	HEAD = TAPE_SIZE/2;
 	if(debug) {printf("[Ox%d] : %d\n", &TAPE[HEAD], TAPE[HEAD]);}
 }
 
@@ -330,6 +330,7 @@ int execute()
 			return FAILURE;
 		}
 		IC++;
+		tape_visualisation();
 	}
 	return SUCCESS;
 }
@@ -419,6 +420,26 @@ void cleanprog()
 }
 void cleantape()
 {
-	HEAD = 512;
+	HEAD = TAPE_SIZE/2;
 	memset(TAPE, 0, sizeof(TAPE));
+}
+
+void tape_visualisation()
+{
+	int i = 0;
+	while ( TAPE[i] == 0 && i < TAPE_SIZE)
+		i++;
+	if(i == TAPE_SIZE)
+	{
+		printf("Empty tape\n");
+		return;
+	}
+	printf("|");
+	while (TAPE[i] != 0 && i < TAPE_SIZE)
+	{
+		printf(" %d |", TAPE[i]);
+		i++;
+	}
+	printf("\n");
+	
 }
