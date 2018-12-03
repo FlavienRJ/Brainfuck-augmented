@@ -274,6 +274,7 @@ void newproc(char procname)
 	if(findProcname(procname) == SUCCESS)
 	{
 		printf("procedure %c already exists\n", procname);
+		inProc = 0;
 	}
 	else
 	{
@@ -303,9 +304,12 @@ int findProcname(char procname)
 
 void endproc()
 {
-	PROGRAM[IC].operator = OP_END_PROC;
-	inProc = 0;	
-	PP++;
+	if(inProc==1)
+	{
+		PROGRAM[IC].operator = OP_END_PROC;
+		inProc = 0;	
+		PP++;
+	}
 }
 
 void callproc(char procname)
@@ -330,7 +334,7 @@ int execute()
 			return FAILURE;
 		}
 		IC++;
-		tape_visualisation();
+		if(visualisation){tape_visualisation(); } 
 	}
 	return SUCCESS;
 }
@@ -405,6 +409,7 @@ int executeproc(char procname)
 				printf("Error during execution of instruction [%d] in procedure %c\n",j,PROC[i].name);
 				return FAILURE;
 			}	
+			if(visualisation){tape_visualisation(); } 
 		}
 		return SUCCESS;
 	}
@@ -435,15 +440,17 @@ void tape_visualisation()
 		return;
 	}
 	char middle[256];
+	memset(middle, 0, sizeof(middle));
 	char top_bot[256];
+	memset(top_bot, 0, sizeof(top_bot));
 
 	if(i==0)
 	{
-		strcat(middle,"\n|");
+		strcat(middle,"|");
 	}
 	else
 	{
-		strcat(middle,"\n| ... |");
+		strcat(middle,"| ... |");
 	}	
 	while (i < TAPE_SIZE)
 	{
@@ -457,6 +464,10 @@ void tape_visualisation()
 		{
 			char buf[8];
 			strcat(middle," ");
+			if(i==HEAD)
+			{
+				strcat(middle, "#");
+			}
 			sprintf(buf, "%d",TAPE[i]);
 			strcat(middle, buf);
 			strcat(middle," |");
@@ -465,6 +476,7 @@ void tape_visualisation()
 	}
 	for (i = 0; i < strlen(middle); i++)
 		top_bot[i] = '-';
+	top_bot[i+1] = '\0';
 	printf("%s\n", top_bot);
 	printf("%s\n", middle);
 	printf("%s\n", top_bot);
