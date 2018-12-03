@@ -62,6 +62,13 @@ void yyerror(const char *s){
 	printf("ERROR: %s at line %d\n", s, yylineno); 
 }
 
+/* Documentation argument for main
+*	-i : interactive console with interpreter
+*	-i filename : interpret the code
+*	-d : enable print debug informations
+*	-v : enable visualization tool
+*	-c filename : translate in c the filename
+*/
 int main(int argc, char **argv)
 {
 	int i;
@@ -89,7 +96,7 @@ int main(int argc, char **argv)
 			}
 			else
 			{
-				printf("No source file to compile!\n");
+				printf("No source file to translate!\n");
 				return -1;
 			}
 		}
