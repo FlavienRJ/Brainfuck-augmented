@@ -233,8 +233,13 @@ void cinput()
 
 void mloop()
 {
+	//Maybe Theresa you can implement the loop for the procedure, copy only how I did with the global stack but with a local stack. Look into the t_fn_instruction
 	if (inProc)
+	{
+		PROC[PP].PROC_INSTR[PROC[PP].size].operator = OP_LOOP;
 		PROC[PP].size++;
+	}
+		
 	PROGRAM[IC].operator = OP_LOOP;
 	if (sfull()) {
 		exit(FAILURE);
@@ -266,12 +271,14 @@ void newproc(char procname)
 	PROC[PP].name = procname;
 	PROC[PP].IC_begin = IC + 1;
 	PROC[PP].size = 0;
+	PROC[PP].stack_size = 0; 
 	
 	//t_instruction* instr = malloc(128 * sizeof(t_instruction));
 }
 
 int findProcname(char procname)
 {
+
 	return 1;
 }
 
@@ -362,7 +369,7 @@ int executeproc(char procname)
 			printf("procname = %c\n", PROC[k].name);
 			for (l=0; l < PROC[k].size; l++)
 			{
-				printf ("\tOp code : %d\n", PROC[k].PROC_INSTR[l].operator);
+				printf ("\tOpcode%d : %d\n",l, PROC[k].PROC_INSTR[l].operator);
 			}
 		}
 	}

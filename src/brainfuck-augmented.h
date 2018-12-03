@@ -1,6 +1,6 @@
 //CONSTANT
 #define TAPE_SIZE       1024
-#define STACK_SIZE      128
+#define STACK_SIZE      512
 #define PROGRAM_SIZE    4096
 
 #define OP_END          0
@@ -36,7 +36,9 @@ typedef struct _fn_instruction {
     char name;
     unsigned short IC_begin;
     unsigned short size;
-    t_instruction PROC_INSTR[128];
+    t_instruction PROC_INSTR[256]; //maybe change to dynamic allocation
+    int stack[STACK_SIZE];
+    int stack_size = 0;
 } t_fn_instruction;
 
 //FUNCTIONS

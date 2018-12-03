@@ -57,7 +57,9 @@ extension : *.bfa
 - [ ] comment
 
 ## Todo list
-- [ ] Write a parser
-- [ ] Write an interpreter
+- [X] Write a parser
+- [X] Write an interpreter
 - [ ] Write a compiler
 - [ ] Visualization tool
+- [ ] Add builtins functions like clear_tape, goto,...
+- [ ] read code from files
