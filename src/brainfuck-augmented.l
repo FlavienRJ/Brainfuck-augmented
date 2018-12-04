@@ -22,7 +22,9 @@
 "\;"            { return END_PROCEDURE; }
 "\$"            { return CLEAN; }
 "\@"            { return GOTO; }
-"\n"            { return END; }
+"\n\n"            { return END; }
+"\n"        ;
+"\t"        ;
 .			;
 
 %%
