@@ -347,12 +347,19 @@ int executeInstr(t_instruction instr, int ic)
 		case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", ic);} HEAD--; break;
 		case OP_ADD: if(debug) {printf("\n[%d] increase\n", ic);} TAPE[HEAD]++; break;
 		case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", ic);} TAPE[HEAD]--; break;
-		case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);} putchar(TAPE[HEAD]); break;
+		case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);} printf("[%d]\t%c \n",TAPE[HEAD],TAPE[HEAD]); break;
+		//we have a new [number]\t ascii representation
 		//I think there is a problem with the reading from the stdin
 		case OP_INPUT: 
 			if(debug) {printf("\n[%d] read\n", ic);}
 			//fflush(); //error to reading but i am to tired to fix it
-			TAPE[HEAD] = (int)getchar();
+			int c;
+			c = (int)(getchar());
+			if (c > 47 && c < 58) //If user enter a number, but this number and not its representation in ASCII
+			{
+				c -= '0';
+			}
+			TAPE[HEAD] = c;
 			break;
 		case OP_LOOP: 
 			if(debug) {printf("\n[%d] loop\n", ic);}
