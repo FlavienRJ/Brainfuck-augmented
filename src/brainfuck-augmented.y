@@ -347,7 +347,7 @@ int executeInstr(t_instruction instr, int ic)
 		case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", ic);} HEAD--; break;
 		case OP_ADD: if(debug) {printf("\n[%d] increase\n", ic);} TAPE[HEAD]++; break;
 		case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", ic);} TAPE[HEAD]--; break;
-		case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);} printf("[%d]\t%c \n",TAPE[HEAD],TAPE[HEAD]); break;
+		case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);} printf("(%d)\t%c \n",TAPE[HEAD],TAPE[HEAD]); break;
 		//we have a new [number]\t ascii representation
 		//I think there is a problem with the reading from the stdin
 		case OP_INPUT: 
@@ -439,48 +439,51 @@ void cleantape()
 void tape_visualisation()
 {
 	int i = 0;
-	while ( TAPE[i] == 0 && i < TAPE_SIZE)
-		i++;
-	if(i == TAPE_SIZE)
-	{
-		printf("Empty tape\n");
-		return;
-	}
 	char middle[256];
 	memset(middle, 0, sizeof(middle));
 	char top_bot[256];
 	memset(top_bot, 0, sizeof(top_bot));
 
-	if(i==0)
+	while ( TAPE[i] == 0 && i < TAPE_SIZE)
+		i++;
+	if(i == TAPE_SIZE)
 	{
-		strcat(middle,"|");
+		strcat(middle, "| ... |");
 	}
 	else
 	{
-		strcat(middle,"| ... |");
-	}	
-	while (i < TAPE_SIZE)
-	{
-		if (TAPE[i] == 0)
+		if(i==0)
 		{
-			strcat(middle," ... |");
-			while (TAPE[i] == 0 && i < TAPE_SIZE)
-				i++;
+			strcat(middle,"|");
 		}
 		else
 		{
-			char buf[8];
-			strcat(middle," ");
-			if(i==HEAD)
+			strcat(middle,"| ... |");
+		}	
+		while (i < TAPE_SIZE)
+		{
+			if (TAPE[i] == 0)
 			{
-				strcat(middle, "#");
+				strcat(middle," ... |");
+				while (TAPE[i] == 0 && i < TAPE_SIZE)
+					i++;
 			}
-			sprintf(buf, "%d",TAPE[i]);
-			strcat(middle, buf);
-			strcat(middle," |");
-			i++;
+			else
+			{
+				char buf[8];
+				strcat(middle," ");
+				if(i==HEAD)
+				{
+					strcat(middle, "#");
+				}
+				sprintf(buf, "%d",TAPE[i]);
+				strcat(middle, buf);
+				strcat(middle," |");
+				i++;
+			}
 		}
 	}
+
 	for (i = 0; i < strlen(middle); i++)
 		top_bot[i] = '-';
 	top_bot[i+1] = '\0';
