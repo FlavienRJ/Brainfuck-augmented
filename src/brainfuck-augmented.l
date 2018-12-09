@@ -6,9 +6,12 @@
 %option noyywrap
 %option yylineno
 %option case-insensitive
+
+%x COMMENT
+
 %%
 
-"\#"			; //Comments
+
 "\>"            { return MRIGHT; }
 "\<"            { return MLEFT; }
 "\+"            { return ADD; }
@@ -22,9 +25,12 @@
 "\;"            { return END_PROCEDURE; }
 "\$"            { return CLEAN; }
 "\@"            { return GOTO; }
-"\n\n"            { return END; }
-"\n"        ;
-"\t"        ;
-.			;
+"\n\n"          { return END; }
+"\n"            ;
+"\t"            ;
+"\#"			{ BEGIN(COMMENT); }
+<COMMENT>.+     ;
+<COMMENT>"\n"   { BEGIN(INITIAL); }
+.			    ;
 
 %%
