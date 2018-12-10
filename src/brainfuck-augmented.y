@@ -10,12 +10,14 @@ extern FILE *yyin;
 void yyerror(const char *s);
 
 int visualisation = 0;
-int interpreter = 1; 
-int debug = 0;
+int interpreter = 0;
+int debug = 1;
 int file = 0;
+int compiler = 1;
 
 int TAPE[TAPE_SIZE] = {0};
 int HEAD;
+FILE * cfile = NULL; //pointer to the file for the compiler
 
 int IC = 0; //Instruction Counter
 
@@ -39,10 +41,10 @@ int inProc = 0; //if 1 then put the instruction in the buffer of the procedure o
 
 //Rules
 %%
-program : stmts 
+program : stmts
 		;
 stmts : stmt
-	| stmts stmt 
+	| stmts stmt
 	| stmts END { endprog(); execute(); cleanprog(); }
 	;
 stmt : MRIGHT {  mright(); IC++; }
@@ -60,21 +62,21 @@ stmt : MRIGHT {  mright(); IC++; }
 	;
 %%
 void yyerror(const char *s){
-	printf("ERROR: %s at line %d\n", s, yylineno); 
+	printf("ERROR: %s at line %d\n", s, yylineno);
 }
 
 /* Documentation argument for main
 *	-i : interactive console with interpreter
 *	-i filename : interpret the code
 *	-d : enable print debug informations
-*	-v : enable visualization tool
+*	-v : enable visualization tool --> show the tape
 *	-c filename : translate in c the filename
 */
 int main(int argc, char **argv)
 {
 	int i;
 	char filename[30];
-	
+
 	for (i=1; i < argc; i++)
 	{
 		//interpreter
@@ -89,11 +91,18 @@ int main(int argc, char **argv)
 		//compiler
 		else if (!strcmp(argv[i], "-c"))
 		{
-			interpreter = 0;
+			//interpreter = 0;
+			compiler = 1;
 			if (argv[i+1] != NULL)
 			{
-				strcpy(filename, argv[i+1]);
+				strcpy(filename, argv[i+1]); //here we get the filename which I should translate to c
 				file = 1;
+				//open a new file to write code to
+				cfile = fopen("brainfuckInC.c", "w");
+				if (debug){
+					if(cfile == NULL){ printf("error opening a new .c file\n");}
+					else{ printf("successfull opend a new c file\n");}
+				}
 			}
 			else
 			{
@@ -137,8 +146,13 @@ void init()
 {
 	HEAD = TAPE_SIZE/2;
 	if(debug) {printf("[Ox%d] : %d\n", &TAPE[HEAD], TAPE[HEAD]);}
+	if(compiler){
+		fprintf(cfile, "int TapeArray[%d] = {0};\n", TAPE_SIZE);
+		fprintf(cfile, "int main(){\n");
+	}
 }
 
+//stack implementation
 void spush(int a)
 {
 	STACK[SP++] = a;
@@ -155,7 +169,7 @@ int sempty()
 		return FAILURE;
 	} else {
 		return SUCCESS;
-	}		
+	}
 }
 int sfull()
 {
@@ -240,13 +254,12 @@ void cinput()
 
 void mloop()
 {
-	//Maybe Theresa you can implement the loop for the procedure, copy only how I did with the global stack but with a local stack. Look into the t_fn_instruction
 	if (inProc)
 	{
 		PROC[PP].PROC_INSTR[PROC[PP].size].operator = OP_LOOP;
 		PROC[PP].size++;
 	}
-		
+
 	PROGRAM[IC].operator = OP_LOOP;
 	if (sfull()) {
 		exit(FAILURE);
@@ -266,7 +279,7 @@ void mloopend()
 		PROGRAM[IC].operator = OP_END_LOOP;
 		PROGRAM[IC].argument = tmp_pc;
 		PROGRAM[tmp_pc].argument = IC;
-	}		
+	}
 }
 
 void newproc(char procname)
@@ -284,7 +297,7 @@ void newproc(char procname)
 		PROC[PP].name = procname;
 		PROC[PP].IC_begin = IC + 1;
 		PROC[PP].size = 0;
-		PROC[PP].stack_size = 0; 
+		PROC[PP].stack_size = 0;
 	}
 	//t_instruction* instr = malloc(128 * sizeof(t_instruction));
 }
@@ -307,7 +320,7 @@ void endproc()
 	if(inProc==1)
 	{
 		PROGRAM[IC].operator = OP_END_PROC;
-		inProc = 0;	
+		inProc = 0;
 		PP++;
 	}
 }
@@ -323,6 +336,20 @@ void endprog()
 	PROGRAM[IC].operator = OP_END;
 }
 
+/** writes every intructio into the cfile**/
+void writeToCFile(){
+ 	/* code */
+ }
+
+void endCfile(){
+	 if(cfile == NULL){
+		 printf("no c file for endinf the c file\n");
+	 }else{
+	 		fprintf(cfile, " return 0; \n }");
+			fclose(cfile);
+ 		}
+ }
+
 int execute()
 {
 	IC = 0;
@@ -334,8 +361,10 @@ int execute()
 			return FAILURE;
 		}
 		IC++;
-		if(visualisation){tape_visualisation(); } 
+		if(visualisation){tape_visualisation(); }
+		//if(compiler){writeToCFile();}
 	}
+	if(compiler){endCfile();}
 	return SUCCESS;
 }
 
@@ -343,14 +372,27 @@ int executeInstr(t_instruction instr, int ic)
 {
 	switch (instr.operator)
 	{
-		case OP_MRIGHT: if(debug) {printf("\n[%d] go right\n", ic);} HEAD++; break;
-		case OP_MLEFT: if(debug) {printf("\n[%d] go left\n", ic);} HEAD--; break;
-		case OP_ADD: if(debug) {printf("\n[%d] increase\n", ic);} TAPE[HEAD]++; break;
-		case OP_MINUS: if(debug) {printf("\n[%d] decrease\n", ic);} TAPE[HEAD]--; break;
-		case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);} printf("(%d)\t%c \n",TAPE[HEAD],TAPE[HEAD]); break;
+		case OP_MRIGHT:
+			/*if(debug) {printf("\n[%d] go right\n", ic);}*/
+			HEAD++;
+			 break;
+		case OP_MLEFT: /*if(debug) {printf("\n[%d] go left\n", ic);}*/ HEAD--; break;
+		case OP_ADD:
+		 	/*if(debug) {printf("\n[%d] increase\n", ic);}*/
+			TAPE[HEAD]++;
+			if(compiler){fprintf(cfile, "TapeArray[%d]+=1;\n",HEAD);} //optimisation possibility
+			break;
+		case OP_MINUS: /*if(debug) {printf("\n[%d] decrease\n", ic);}*/
+			TAPE[HEAD]--;
+			if(compiler){fprintf(cfile, "TapeArray[%d]-=1;\n",HEAD);} //optimisation possibility
+			break;
+		case OP_OUTPUT: /*if(debug) {printf("\n[%d] print\n", ic);}*/
+			printf("(%d)\t%c \n",TAPE[HEAD],TAPE[HEAD]);
+			if(compiler){fprintf(cfile, "printf(%"(%%d)%\t %%c %\n%",TapeArray[%d],TapeArray[%d]);\n",HEAD,);} 
+			break;
 		//we have a new [number]\t ascii representation
 		//I think there is a problem with the reading from the stdin
-		case OP_INPUT: 
+		case OP_INPUT:
 			if(debug) {printf("\n[%d] read\n", ic);}
 			//fflush(); //error to reading but i am to tired to fix it
 			int c;
@@ -361,18 +403,18 @@ int executeInstr(t_instruction instr, int ic)
 			}
 			TAPE[HEAD] = c;
 			break;
-		case OP_LOOP: 
-			if(debug) {printf("\n[%d] loop\n", ic);}
+		case OP_LOOP:
+			/*if(debug) {printf("\n[%d] loop\n", ic);}*/
 			if(!TAPE[HEAD]) {
 				IC = PROGRAM[IC].argument;
 			}
 			break;
 		case OP_END_LOOP:
-			if(debug) {printf("\n[%d] end loop\n", ic);}
+			/*if(debug) {printf("\n[%d] end loop\n", ic);}*/
 			if(TAPE[HEAD]) {
 				IC = PROGRAM[IC].argument;
 			}
-			break; 
+			break;
 		case OP_NEW_PROC:
 			if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
 			break;
@@ -391,8 +433,8 @@ int executeInstr(t_instruction instr, int ic)
 int executeproc(char procname)
 {
 	int i = 0;
-	if(debug) 
-	{ 
+	if(debug)
+	{
 		printf("\n[%d] executeproc: %c\n", IC, procname);
 		int k,l;
 		for (k = 0; k < PP; k++)
@@ -415,8 +457,8 @@ int executeproc(char procname)
 			{
 				printf("Error during execution of instruction [%d] in procedure %c\n",j,PROC[i].name);
 				return FAILURE;
-			}	
-			if(visualisation){tape_visualisation(); } 
+			}
+			if(visualisation){tape_visualisation(); }
 		}
 		return SUCCESS;
 	}
@@ -459,7 +501,7 @@ void tape_visualisation()
 		else
 		{
 			strcat(middle,"| ... |");
-		}	
+		}
 		while (i < TAPE_SIZE)
 		{
 			if (TAPE[i] == 0)

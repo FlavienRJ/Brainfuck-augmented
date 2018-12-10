@@ -48,17 +48,17 @@ extension : *.bfa
 - Arguments for the program. Ex ./brainfuck -i test.tf 1 2 3 4 5 will write 1 2 3 4 5 on the first 5 cells of the tape
 
 ## What we need to implement
-- [ ] procedure
-- [ ] loops
-- [ ] conditional statements
-- [ ] input
-- [ ] output
-- [ ] bubble sort or any other example programm
-- [ ] comment
+- [x] procedure
+- [x] loops
+- [x] conditional statements
+- [x] input
+- [x] output
+- [x] bubble sort or any other example programm
+- [x] comment
 
 ## Todo list
 - [X] Write a parser
 - [X] Write an interpreter
 - [ ] Write a compiler
 - [ ] Visualization tool
-- [ ] Add builtins functions like clear_tape, goto,...
+- [ ] Add builtins functions like clear_tape, goto (instruction),...
