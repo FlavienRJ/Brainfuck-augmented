@@ -335,10 +335,104 @@ void endprog()
 {
 	PROGRAM[IC].operator = OP_END;
 }
+ //for the compiler and procedures
+int writeProctoC(char procname){
+	 int i = 0;
+ 	if(debug)
+ 	{
+ 		printf("\n[%d] executeproc: %c\n", IC, procname);
+ 		int k,l;
+ 		for (k = 0; k < PP; k++)
+ 		{
+ 			printf("procname = %c\n", PROC[k].name);
+ 			for (l=0; l < PROC[k].size; l++)
+ 			{
+ 				printf ("\tOpcode%d : %d\n",l, PROC[k].PROC_INSTR[l].operator);
+ 			}
+ 		}
+ 	}
+ 	i = findProcname(procname);
+ 	if( i >= 0)
+ 	{
+ 		if(debug) {printf("Procedure %c found\n", procname); }
+ 		int j;
+ 		for (j = 0; j < PROC[i].size; j++)
+ 		{
+ 			if (writeToCFile(PROC[i].PROC_INSTR[j],j) == FAILURE)
+ 			{
+ 				printf("Error during execution of instruction [%d] in procedure %c\n",j,PROC[i].name);
+ 				return FAILURE;
+ 			}
+			else{
+				fprintf(cfile, "\t" );
+			}
+				//if(visualisation){tape_visualisation(); }
+ 		}
+ 		return SUCCESS;
+ 	}
+ 	printf("Procedure %c does not exist\n",procname);
+ 	return FAILURE;
+ }
+/** writes every intructio into the cfile, similar like executeInstr()**/
+int writeToCFile(t_instruction instr, int ic){
+		switch (instr.operator)
+		{
+			case OP_ADD:
+			 	if(debug) {printf("\n[%d] increase\n", ic);}
+				fprintf(cfile, "TapeArray[%d]+=1;\n",HEAD); //optimisation possibility
+				break;
+			case OP_MINUS:
+				if(debug) {printf("\n[%d] decrease\n", ic);}
+				if(compiler){fprintf(cfile, "TapeArray[%d]-=1;\n",HEAD);} //optimisation possibility
+				break;
+			case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);}
+				//printf("(%d)\t%c \n",TAPE[HEAD],TAPE[HEAD]);
+				//fprintf(cfile, "printf(%"(%%d)%\t %%c %\n%",TapeArray[%d],TapeArray[%d]);\n",HEAD,); not working so far... how can I print ""?
+				break;
+			//we have a new [number]\t ascii representation
+			//I think there is a problem with the reading from the stdin
+			case OP_INPUT:
+				if(debug) {printf("\n[%d] read\n", ic);}
+				//fflush(); //error to reading but i am to tired to fix it
+				/*int c;
+				c = (int)(getchar());
+				if (c > 47 && c < 58) //If user enter a number, but this number and not its representation in ASCII
+				{
+					c -= '0';
+				}
+				TAPE[HEAD] = c;*/
 
-/** writes every intructio into the cfile**/
-void writeToCFile(){
- 	/* code */
+				break;
+			case OP_LOOP:
+				/*if(debug) {printf("\n[%d] loop\n", ic);}*/
+				/*
+				if(!TAPE[HEAD]) {
+					IC = PROGRAM[IC].argument;
+				}*/
+				break;
+			case OP_END_LOOP:
+				/*if(debug) {printf("\n[%d] end loop\n", ic);}*/
+				/*if(TAPE[HEAD]) {
+					IC = PROGRAM[IC].argument;
+				}*/
+				break;
+			case OP_NEW_PROC:
+				if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
+				fprintf(cfile, "void %c (){\n",PROGRAM[ic].name);
+				break;
+			case OP_END_PROC:
+				//in the compiler I already have to write down the proc here not later
+				writeProctoC(PROGRAM[IC].name);
+				fprintf(cfile, "}\n");
+				break;
+			case OP_CALL_PROC:
+				if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
+				fprintf(cfile, "%c ();\n",PROGRAM[ic].name);
+				break;
+
+			default: return FAILURE;
+		}
+		return SUCCESS;
  }
 
 void endCfile(){
@@ -362,7 +456,12 @@ int execute()
 		}
 		IC++;
 		if(visualisation){tape_visualisation(); }
-		//if(compiler){writeToCFile();}
+		if(compiler){
+			if (writeToCFile(PROGRAM[IC],IC) == FAILURE){
+				printf("Error during converting of instruction [%d] to c\n",IC);
+				return FAILURE;
+			}
+		}
 	}
 	if(compiler){endCfile();}
 	return SUCCESS;
@@ -380,11 +479,11 @@ int executeInstr(t_instruction instr, int ic)
 		case OP_ADD:
 		 	/*if(debug) {printf("\n[%d] increase\n", ic);}*/
 			TAPE[HEAD]++;
-			if(compiler){fprintf(cfile, "TapeArray[%d]+=1;\n",HEAD);} //optimisation possibility
+			//if(compiler){fprintf(cfile, "TapeArray[%d]+=1;\n",HEAD);} //optimisation possibility
 			break;
 		case OP_MINUS: /*if(debug) {printf("\n[%d] decrease\n", ic);}*/
 			TAPE[HEAD]--;
-			if(compiler){fprintf(cfile, "TapeArray[%d]-=1;\n",HEAD);} //optimisation possibility
+			//if(compiler){fprintf(cfile, "TapeArray[%d]-=1;\n",HEAD);} //optimisation possibility
 			break;
 		case OP_OUTPUT: /*if(debug) {printf("\n[%d] print\n", ic);}*/
 			printf("(%d)\t%c \n",TAPE[HEAD],TAPE[HEAD]);
@@ -417,16 +516,16 @@ int executeInstr(t_instruction instr, int ic)
 			break;
 		case OP_NEW_PROC:
 			if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
-			if(compiler){fprintf(cfile, "void %c (){\n",PROGRAM[ic].name);}
+			//if(compiler){fprintf(cfile, "void %c (){\n",PROGRAM[ic].name);}
 			break;
 		case OP_END_PROC:
 			//in the compiler I already have to write down the proc here not later
-			if(compiler){fprintf(cfile, "}\n");}
+			//if(compiler){fprintf(cfile, "}\n");}
 			break;
 		case OP_CALL_PROC:
 			if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
 			executeproc(PROGRAM[IC].name);
-			if(compiler){fprintf(cfile, "%c ();\n",PROGRAM[ic].name}
+			//if(compiler){fprintf(cfile, "%c ();\n",PROGRAM[ic].name}
 			break;
 
 		default: return FAILURE;
