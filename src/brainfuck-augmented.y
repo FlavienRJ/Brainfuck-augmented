@@ -148,7 +148,7 @@ void init()
 	if(debug) {printf("[Ox%d] : %d\n", &TAPE[HEAD], TAPE[HEAD]);}
 	if(compiler){
 		fprintf(cfile, "int TapeArray[%d] = {0};\n", TAPE_SIZE);
-		fprintf(cfile, "int main(){\n");
+		fprintf(cfile, "int main ( int argc, char *argv[] ){\n");
 	}
 }
 
@@ -388,7 +388,7 @@ int executeInstr(t_instruction instr, int ic)
 			break;
 		case OP_OUTPUT: /*if(debug) {printf("\n[%d] print\n", ic);}*/
 			printf("(%d)\t%c \n",TAPE[HEAD],TAPE[HEAD]);
-			if(compiler){fprintf(cfile, "printf(%"(%%d)%\t %%c %\n%",TapeArray[%d],TapeArray[%d]);\n",HEAD,);} 
+			//if(compiler){fprintf(cfile, "printf(%"(%%d)%\t %%c %\n%",TapeArray[%d],TapeArray[%d]);\n",HEAD,);} not working so far... how can I print ""?
 			break;
 		//we have a new [number]\t ascii representation
 		//I think there is a problem with the reading from the stdin
@@ -417,12 +417,16 @@ int executeInstr(t_instruction instr, int ic)
 			break;
 		case OP_NEW_PROC:
 			if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
+			if(compiler){fprintf(cfile, "void %c (){\n",PROGRAM[ic].name);}
 			break;
 		case OP_END_PROC:
+			//in the compiler I already have to write down the proc here not later
+			if(compiler){fprintf(cfile, "}\n");}
 			break;
 		case OP_CALL_PROC:
 			if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
 			executeproc(PROGRAM[IC].name);
+			if(compiler){fprintf(cfile, "%c ();\n",PROGRAM[ic].name}
 			break;
 
 		default: return FAILURE;
