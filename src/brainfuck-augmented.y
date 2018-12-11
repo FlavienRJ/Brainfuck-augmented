@@ -192,8 +192,14 @@ int sfull()
 void mright()
 {
 	if (inProc)
+	{
+		PROC[PP].PROC_INSTR[PROC[PP].size].operator = OP_MRIGHT;
 		PROC[PP].size++;
-	PROGRAM[IC].operator = OP_MRIGHT;
+	}
+	else
+	{
+		PROGRAM[IC].operator = OP_MRIGHT;
+	}
 }
 
 void mleft()
@@ -292,6 +298,7 @@ void mloopend()
 	}		
 }
 
+//Before call a procedure, be sure to add it in the program before
 void newproc(char procname)
 {
 	if(findProcname(procname) >= 0)
