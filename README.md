@@ -62,7 +62,3 @@ extension : *.bfa
 - [ ] Write a compiler
 - [ ] Visualization tool
 - [ ] Add builtins functions like clear_tape, goto,...
-
-"\#"			{ BEGIN(COMMENT); }
-<COMMENT>.+     ;
-<COMMENT>"\n"     { BEGIN(INITIAL); }

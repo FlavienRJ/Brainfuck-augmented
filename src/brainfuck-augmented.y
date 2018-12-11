@@ -40,10 +40,10 @@ int inProc = 0; //if 1 then put the instruction in the buffer of the procedure o
 //Rules
 %%
 program : stmts 
-		| stmts END { endprog(); execute(); cleanprog(); }
 		;
 stmts : stmt
-	| stmts stmt 
+	| stmts stmt
+	| stmts END { endprog(); execute(); cleanprog(); }
 	;
 stmt : MRIGHT {  mright(); IC++; }
 	| MLEFT {  mleft(); IC++; }
