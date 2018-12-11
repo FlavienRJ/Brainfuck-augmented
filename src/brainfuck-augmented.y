@@ -389,7 +389,7 @@ int writeToCFile(t_instruction instr, int ic){
 				break;
 			case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);}
 				//printf("(%d)\t%c \n",TAPE[HEAD],TAPE[HEAD]);
-				fprintf(cfile, "\t printf(/""(%%d)%\t %%c %\n%"",TapeArray[%d],TapeArray[%d]);\n",HEAD,HEAD); not working so far... how can I print ""?
+				fprintf(cfile, "\t printf(\"(%d)\%t \%c \\n \"),TapeArray[%d]);\n",HEAD,HEAD);
 				break;
 			//we have a new [number]\t ascii representation
 			//I think there is a problem with the reading from the stdin
