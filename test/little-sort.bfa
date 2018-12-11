@@ -1,14 +1,14 @@
->,
-[>>+>,]
+>, #Read first value
+[>>+>,] #While the value enter is not 0 read value
 <
-[<
+[< #Prepare values
     [<<<+>>>-]
     <
     [-<<+>>>]
     >[<]<<
 ]
 <
-[
+[ #Sort values
     [
         [<<+>>-]
         <+<-
@@ -27,4 +27,4 @@
     ]<
 ]
 <[<<]>>
-[.>>]
+[.>>] #Print ordered values

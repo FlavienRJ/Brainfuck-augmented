@@ -44,6 +44,7 @@ int inProc = 0; //if 1 then put the instruction in the buffer of the procedure o
 
 //Rules
 %%
+
 program : stmts
 		;
 stmts : stmt
@@ -74,12 +75,14 @@ void yyerror(const char *s){
 *	-d : enable print debug informations
 *	-v : enable visualization tool --> show the tape
 *	-c filename : translate in c the filename
+*	-a nbArg arg1 arg2 ... argN : fill the tape with value
 */
 int main(int argc, char **argv)
 {
 	int i;
 	char filename[30];
-
+	init();
+  
 	for (i=1; i < argc; i++)
 	{
 		//interpreter
@@ -123,6 +126,18 @@ int main(int argc, char **argv)
 		{
 			debug = 1;
 		}
+		//arguments
+		else if (!strcmp(argv[i], "-a"))
+		{
+			i++;
+			int nbArg = atoi(argv[i]);
+			int j;
+			for (j = 0; j < nbArg; j++)
+			{
+				TAPE[HEAD + j] = atoi(argv[++i]);
+				if(debug){printf("add arg%d in the tape = %d\n", j, TAPE[HEAD + j]);}
+			}
+		}
 		else
 		{
 			continue;
@@ -138,8 +153,7 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
-	init();
-	yyparse();
+	yyparse();	
 	fclose(yyin);
 	//compile or execute
 	if (interpreter == 1){

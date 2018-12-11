@@ -62,3 +62,5 @@ extension : *.bfa
 - [ ] Write a compiler
 - [ ] Visualization tool
 - [ ] Add builtins functions like clear_tape, goto (instruction),...
+
+
