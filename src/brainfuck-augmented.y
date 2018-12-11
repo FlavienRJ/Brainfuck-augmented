@@ -377,6 +377,8 @@ int writeProctoC(char procname){
 int writeToCFile(t_instruction instr, int ic){
 		switch (instr.operator)
 		{
+			case OP_MRIGHT:/*if(debug) {printf("\n[%d] go right\n", ic);}*/break;
+			case OP_MLEFT: /*if(debug) {printf("\n[%d] go left\n", ic);}*/break;
 			case OP_ADD:
 			 	if(debug) {printf("\n[%d] increase\n", ic);}
 				fprintf(cfile, "TapeArray[%d]+=1;\n",HEAD); //optimisation possibility
@@ -430,7 +432,7 @@ int writeToCFile(t_instruction instr, int ic){
 				fprintf(cfile, "%c ();\n",PROGRAM[ic].name);
 				break;
 
-			default: return FAILURE;
+			default: return FAILURE;//i don´t have every case, maybe I should add them to not get a FAILURE
 		}
 		return SUCCESS;
  }
