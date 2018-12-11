@@ -380,16 +380,16 @@ int writeToCFile(t_instruction instr, int ic){
 			case OP_MRIGHT:/*if(debug) {printf("\n[%d] go right\n", ic);}*/break;
 			case OP_MLEFT: /*if(debug) {printf("\n[%d] go left\n", ic);}*/break;
 			case OP_ADD:
-			 	if(debug) {printf("\n[%d] increase\n", ic);}
-				fprintf(cfile, "TapeArray[%d]+=1;\n",HEAD); //optimisation possibility
+			 	if(debug) {printf("\n [%d] increase\n", ic);}
+				fprintf(cfile, "\t TapeArray[%d]+=1;\n",HEAD); //optimisation possibility
 				break;
 			case OP_MINUS:
-				if(debug) {printf("\n[%d] decrease\n", ic);}
-				if(compiler){fprintf(cfile, "TapeArray[%d]-=1;\n",HEAD);} //optimisation possibility
+				if(debug) {printf("\n [%d] decrease\n", ic);}
+				if(compiler){fprintf(cfile, "\t TapeArray[%d]-=1;\n",HEAD);} //optimisation possibility
 				break;
 			case OP_OUTPUT: if(debug) {printf("\n[%d] print\n", ic);}
 				//printf("(%d)\t%c \n",TAPE[HEAD],TAPE[HEAD]);
-				//fprintf(cfile, "printf(%"(%%d)%\t %%c %\n%",TapeArray[%d],TapeArray[%d]);\n",HEAD,); not working so far... how can I print ""?
+				fprintf(cfile, "\t printf(/""(%%d)%\t %%c %\n%"",TapeArray[%d],TapeArray[%d]);\n",HEAD,HEAD); not working so far... how can I print ""?
 				break;
 			//we have a new [number]\t ascii representation
 			//I think there is a problem with the reading from the stdin
@@ -407,29 +407,32 @@ int writeToCFile(t_instruction instr, int ic){
 				break;
 			case OP_LOOP:
 				/*if(debug) {printf("\n[%d] loop\n", ic);}*/
+				//for loop ?!
 				/*
 				if(!TAPE[HEAD]) {
 					IC = PROGRAM[IC].argument;
 				}*/
+				//fprintf(cfile, "for ( %d; condition; increment ) {\nstatement(s);}\n",TAPE[HEAD] );
 				break;
 			case OP_END_LOOP:
 				/*if(debug) {printf("\n[%d] end loop\n", ic);}*/
 				/*if(TAPE[HEAD]) {
 					IC = PROGRAM[IC].argument;
 				}*/
+				//fprintf(cfile, "}\n");
 				break;
 			case OP_NEW_PROC:
 				if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
-				fprintf(cfile, "void %c (){\n",PROGRAM[ic].name);
+				fprintf(cfile, "\tvoid %c (){\n",PROGRAM[ic].name);
 				break;
 			case OP_END_PROC:
 				//in the compiler I already have to write down the proc here not later
 				writeProctoC(PROGRAM[IC].name);
-				fprintf(cfile, "}\n");
+				fprintf(cfile, "\t}\n");
 				break;
 			case OP_CALL_PROC:
 				if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
-				fprintf(cfile, "%c ();\n",PROGRAM[ic].name);
+				fprintf(cfile, "\t%c ();\n",PROGRAM[ic].name);
 				break;
 
 			default: return FAILURE;//i don´t have every case, maybe I should add them to not get a FAILURE
