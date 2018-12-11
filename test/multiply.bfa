@@ -1,0 +1,22 @@
+>>, #get X
+[ #copy X in tmp1
+    <+
+    >-
+]
+>, #get Y
+<< 
+[ #while tmp1
+    >>
+    [ #Add y in tmp0 and X
+        <+ 
+        <<+
+        >>>-
+    ]
+    <<< #goto tmp0
+    [ # recover value of Y from tmp0
+        >>>+
+        <<<-
+    ]
+    >-
+]
+>.

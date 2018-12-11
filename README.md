@@ -57,14 +57,8 @@ extension : *.bfa
 - [x] comment
 
 ## Todo list
-- [X] Write a parser
-- [X] Write an interpreter
+- [x] Write a parser
+- [x] Write an interpreter
 - [ ] Write a compiler
-- [ ] Visualization tool
-<<<<<<< HEAD
-- [ ] Add builtins functions like clear_tape, goto,...
-=======
-- [ ] Add builtins functions like clear_tape, goto (instruction),...
-
-
->>>>>>> c6333694ac41d721da551d63e3c41202c6dca890
+- [x] Visualization tool
+- [~] Add builtins functions like clear_tape, goto,...

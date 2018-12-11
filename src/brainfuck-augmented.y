@@ -11,9 +11,10 @@ void yyerror(const char *s);
 
 int visualisation = 0;
 int interpreter = 1;
-int debug = 1;
+int debug = 0;
 int file = 0;
 int compiler = 0;
+int compileObject = 0;
 
 //FRJ - useless for C program. Maybe use a global variable to count the number of \t is a better idea
 int insideLoop = 0; //otherwise the compiler prints the loop too often
@@ -76,6 +77,7 @@ void yyerror(const char *s){
 *	-d : enable print debug informations
 *	-v : enable visualization tool --> show the tape
 *	-c filename : translate in c the filename
+*	-o filename : compile filename in generating c file
 *	-a nbArg arg1 arg2 ... argN : fill the tape with value
 */
 int main(int argc, char **argv)
@@ -98,17 +100,38 @@ int main(int argc, char **argv)
 		//compiler
 		else if (!strcmp(argv[i], "-c"))
 		{
-			//interpreter = 0;
+			interpreter = 0;
+			compileObject = 1;
+			if (argv[i+1] != NULL)
+			{
+				strcpy(filename, argv[i+1]); //here we get the filename which I should translate to c
+				file = 1;
+				//open a new file to write code to
+				cfile = fopen("build/brainfuckInC.c", "w"); //FRJ - Maybe compile file filename.c and not this name
+				if (debug){
+					if(cfile == NULL){ printf("error opening a new .c file\n");}
+					else{ printf("successfully opend a new c file\n");}
+				}
+			}
+			else
+			{
+				printf("No source file to translate!\n");
+				return -1;
+			}
+		}
+		else if (!strcmp(argv[i], "-o"))
+		{
+			interpreter = 0;
 			compiler = 1;
 			if (argv[i+1] != NULL)
 			{
 				strcpy(filename, argv[i+1]); //here we get the filename which I should translate to c
 				file = 1;
 				//open a new file to write code to
-				cfile = fopen("brainfuckInC.c", "w");
+				cfile = fopen("build/brainfuckInC.c", "w"); //FRJ - Maybe compile file filename.c and not this name
 				if (debug){
 					if(cfile == NULL){ printf("error opening a new .c file\n");}
-					else{ printf("successfully opend a new c file\n");}
+					else{ printf("successfully opened a new c file\n");}
 				}
 			}
 			else
@@ -162,13 +185,17 @@ int main(int argc, char **argv)
 	}
 
 	if (compiler == 1){
+		translate();
+	}
+
+	if (compiler == 1){
 		compile();
 	}
 	return 0;
 }
 
 //FRJ - don't forget do declare your function's prototype, without the compiler will give you a warning. Try to avoid warnings -> side-effect
-int compile()
+int translate()
 {
 	IC = 0;
 	while (PROGRAM[IC].operator != OP_END && HEAD < TAPE_SIZE && HEAD > 0)
@@ -181,6 +208,15 @@ int compile()
 	}
 	endCfile();
 	return SUCCESS;
+}
+int compile()
+{
+	translate();
+	const char* cmd = "gcc build/brainfuckInC.c"; //FRJ - change with the right name
+	if (system(cmd) == -1)
+	{
+		printf("Error during compiling the C file\n");
+	}
 }
 
 void init()

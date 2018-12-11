@@ -72,4 +72,5 @@ void tape_visualisation();
 int writeToCFile(t_instruction instr, int ic);
 void endCfile();
 int writeProctoC(char procname);
+int translate();
 int compile();
