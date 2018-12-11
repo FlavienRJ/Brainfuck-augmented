@@ -7,7 +7,7 @@
 #define OP_MRIGHT       1
 #define OP_MLEFT        2
 #define OP_ADD          3
-#define OP_MINUS        4    
+#define OP_MINUS        4
 #define OP_OUTPUT       5
 #define OP_INPUT        6
 #define OP_LOOP         7
@@ -21,7 +21,7 @@
 
 //FLAGS
 extern int visualisation;
-extern int interpreter; 
+extern int interpreter;
 extern int debug;
 extern int file;
 
@@ -69,3 +69,6 @@ void cleanprog();
 void cleantape();
 
 void tape_visualisation();
+int writeToCFile(t_instruction instr, int ic);
+void endCfile();
+int writeProctoC(char procname);
