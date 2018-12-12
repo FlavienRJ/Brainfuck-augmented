@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 	 TapeArray[head]+=1;
 	 TapeArray[head]+=1;
 	 TapeArray[head]+=1;
@@ -104,5 +105,9 @@
 	 TapeArray[head]+=1;
 	 TapeArray[head]+=1;
 	 printf("(528)%c \n ",TapeArray[528]);
+=======
+	 void A(){
+	 head+=1;
+>>>>>>> 994f99a8720ac9604fb414f2e28983e83bcda832
  return 0; 
  }
