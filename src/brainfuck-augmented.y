@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 	int i;
 	char filename[30];
 	init();
-  
+
 	for (i=1; i < argc; i++)
 	{
 		//interpreter
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
-	yyparse();	
+	yyparse();
 	fclose(yyin);
 	//compile or execute
 	if (interpreter == 1){

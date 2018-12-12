@@ -1,4 +1,4 @@
-how do i do it with printf in the c file? how can I print ""?
+how do i do it with printf in the c file? how can I print ""? --> \
 
 Idea for more efficiency: make a  variable that changes every case and a poitner that counts the amoint of times we get in the same case. 
 after the switch case, we analyse these two and if it changed from the last time I print something in the c file.
@@ -6,11 +6,13 @@ Maybe a additional variable to save the TAPE[HEAD]. because the interpreter chan
 -> i could compare the old cell value with the new one (in case of add and minus)
 -> for printing i need to save data bevore printing  the data --> change -->print (list structure?)
 -> the beginning and end of procs need to be directly printed
--> what with loops? -> does something that long until we are at the beginning of the tape? (we start in the middle of the tape)
+-> what with loops? -> does something that long until the cell were we are bevor the loop is 0;
 
 
-NoST:
-Claculators, paper, web calculators are possible
+issues: 
+
+[ ]check the proc, not shure if it is working that easy
+[ ] tab += '/t' ?? snprintf maybe or strcpy, or strncpy(word2,word,strlen(word)-1);
 
 
 
