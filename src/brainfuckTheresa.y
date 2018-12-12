@@ -411,6 +411,7 @@ int writeProctoC(char procname){
 int writeToCFile(t_instruction instr, int ic){
 	newOperator = instr.operator;
 	if(oldOperator != newOperator){
+		int t;
 		switch (oldOperator) {
 			case OP_MRIGHT:
 				fprintf(cfile, "%c head+=%d;\n", tab, cnt);
@@ -430,26 +431,23 @@ int writeToCFile(t_instruction instr, int ic){
 				break;
 			case OP_OUTPUT:
 				if(debug) {printf("\n[%d] print\n", ic);}
-				fprintf(cfile, "%c printf(\"\%t \%c \\n \",TapeArray[head]);\n",tab);
+				for(t = 0; t<cnt; t++){
+					fprintf(cfile, "%c printf(\"\%t \%c \\n \",TapeArray[head]);\n",tab);
+				}
 				break;
 				//I think there is a problem with the reading from the stdin
 			case OP_INPUT:
 				if(debug) {printf("\n[%d] read\n", ic);}
-					//FRJ - just a scanf() doesn't work ?
-					//fflush(); //error to reading but i am to tired to fix it
-					/*int c;
-					c = (int)(getchar());
-					if (c > 47 && c < 58) //If user enter a number, but this number and not its representation in ASCII
-					{
-						c -= '0';
-					}
-					TAPE[HEAD] = c;*/
+				for(t = 0; t<cnt; t++){
+					fprintf(cfile, "scanf(\"\%d\", TapeArray[head]);\n"); //TK not tested
+				}
 				break;
 			case OP_LOOP:
 				/*if(debug) {printf("\n[%d] loop\n", ic);}*/
-				fprintf(cfile, "%c i = head;\n", tab);
-				fprintf(cfile, "%c while (!TapeArray[i]) {\n",tab);
+				//fprintf(cfile, "%c i = head;\n", tab);
+				fprintf(cfile, "%c while (TapeArray[head]!=0) {\n",tab);
 				insideLoop++;
+
 				//snprintf();change the tab
 				break;
 			case OP_END_LOOP:
@@ -459,10 +457,12 @@ int writeToCFile(t_instruction instr, int ic){
 				break;
 			case OP_NEW_PROC:
 				if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
-				fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
+				//fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
 				//writeProctoC(PROGRAM[ic].name);
 				break;
 			case OP_END_PROC:
+				executeproc(PROGRAM[IC].name);
+				fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
 				writeProctoC(PROGRAM[IC].name);
 				fprintf(cfile, "%c}\n",tab);
 				break;
@@ -478,47 +478,26 @@ int writeToCFile(t_instruction instr, int ic){
 		{
 			case OP_MRIGHT:
 			/*if(debug) {printf("\n[%d] go right\n", ic);}*/
-				newOperator = OP_MRIGHT;
 				cnt++;
 				break;
 			case OP_MLEFT:
 				/*if(debug) {printf("\n[%d] go left\n", ic);}*/
-				newOperator = OP_MLEFT;
 				cnt++;
 				break;
 			case OP_ADD:
 			 	//if(debug) {printf("\n [%d] increase\n", ic);}
-				newOperator = OP_ADD;
 				cnt++;
 				break;
 			case OP_MINUS:
 				//if(debug) {printf("\n [%d] decrease\n", ic);}
-				newOperator = OP_MINUS;
 				cnt++;
 				break;
 			case OP_OUTPUT:
-				newOperator = OP_OUTPUT;
+				cnt++;
 				break;
-			//I think there is a problem with the reading from the stdin
 			case OP_INPUT:
-				newOperator = OP_INPUT;
+				cnt++;
 				break;
-			case OP_LOOP:
-				newOperator = OP_LOOP;
-				break;
-			case OP_END_LOOP:
-				newOperator = OP_END_LOOP;
-				break;
-			case OP_NEW_PROC:
-				newOperator = OP_NEW_PROC;
-				break;
-			case OP_END_PROC:
-				newOperator = OP_END_PROC;
-				break;
-			case OP_CALL_PROC:
-				newOperator = OP_CALL_PROC;
-				break;
-			default: return FAILURE;//i don´t have every case, maybe I should add them to not get a FAILURE
 		}
 	}
 		oldOperator = newOperator;

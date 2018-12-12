@@ -506,7 +506,7 @@ int writeToCFile(t_instruction instr, int ic){
 			case OP_INPUT:
 				if(debug) {printf("\n[%d] read\n", ic);}
 				fprintf(cfile, "scanf(\%d, TapeArray[head]);\n");
-				//FRJ - just a scanf() doesn't work ?
+				// - just a scanf() doesn't work ?
 				break;
 			case OP_LOOP:
 				/*if(debug) {printf("\n[%d] loop\n", ic);}*/

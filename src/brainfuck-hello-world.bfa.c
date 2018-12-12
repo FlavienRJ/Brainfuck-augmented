@@ -9,12 +9,10 @@ int i = 0 ;
 
 int main ( int argc, char *argv[] ){
 	 TapeArray[head]+=8;
-	 i = head;
-	 while (!TapeArray[i]) {
+	 while (TapeArray[head]!=0) {
 	 head+=1;
 	 TapeArray[head]+=4;
-	 i = head;
-	 while (!TapeArray[i]) {
+	 while (TapeArray[head]!=0) {
 	 head+=1;
 	 TapeArray[head]+=2;
 	 head+=1;
@@ -34,8 +32,7 @@ int main ( int argc, char *argv[] ){
 	 TapeArray[head]-=1;
 	 head+=2;
 	 TapeArray[head]+=1;
-	 i = head;
-	 while (!TapeArray[i]) {
+	 while (TapeArray[head]!=0) {
 	 head-=1;
 	 }
 	 head-=1;
@@ -48,7 +45,8 @@ int main ( int argc, char *argv[] ){
 	 printf("%c \n ",TapeArray[head]);
 	 TapeArray[head]+=7;
 	 printf("%c \n ",TapeArray[head]);
-	 TapeArray[head]+=3;
+	 printf("%c \n ",TapeArray[head]);
+	 TapeArray[head]+=4;
 	 printf("%c \n ",TapeArray[head]);
 	 head+=2;
 	 printf("%c \n ",TapeArray[head]);
