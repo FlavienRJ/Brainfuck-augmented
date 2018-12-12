@@ -69,6 +69,11 @@ void cleanprog();
 void cleantape();
 
 void tape_visualisation();
+
+//compiler
+void cHeader();
 int writeToCFile(t_instruction instr, int ic);
 void endCfile();
 int writeProctoC(char procname);
+int compile();
+int translate();
