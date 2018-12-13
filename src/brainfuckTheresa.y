@@ -181,6 +181,9 @@ int compile(){
 		IC++;
 		//if(visualisation){tape_visualisation(); }
 	}
+	//the last instruction
+	IC--;
+	LastInstruction(IC);
 	endCfile();
 	return SUCCESS;
 }
@@ -189,7 +192,67 @@ void init()
 	HEAD = TAPE_SIZE/2;
 	if(debug) {printf("[Ox%d] : %d\n", &TAPE[HEAD], TAPE[HEAD]);}
 }
+int LastInstruction(int ic){
+	int f;
+	switch (oldOperator) {
+		case OP_MRIGHT:
+			fprintf(cfile, "%c head+=%d;\n", tab, cnt);
+			cnt = 1;
+			break;
+		case OP_MLEFT:
+			fprintf(cfile, "%c head-=%d;\n", tab, cnt);
+			cnt = 1;
+			break;
+		case OP_ADD:
+			fprintf(cfile, "%c TapeArray[head]+=%d;\n", tab, cnt);
+			cnt = 1;
+			break;
+		case OP_MINUS:
+			fprintf(cfile, "%c TapeArray[head]-=%d;\n", tab, cnt);
+			cnt = 1;
+			break;
+		case OP_OUTPUT:
+			for(f = 0; f<cnt; f++){
+				fprintf(cfile, "%c printf(\"\%t \%c \\n \",TapeArray[head]);\n",tab);
+			}
+			break;
+			//I think there is a problem with the reading from the stdin
+		case OP_INPUT:
+			for(f = 0; f<cnt; f++){
+				fprintf(cfile, "scanf(\"\%d\", TapeArray[head]);\n"); //TK not tested
+			}
+			break;
+		case OP_LOOP:
+			/*if(debug) {printf("\n[%d] loop\n", ic);}*/
+			//fprintf(cfile, "%c i = head;\n", tab);
+			fprintf(cfile, "%c while (TapeArray[head]!=0) {\n",tab);
+			insideLoop++;
 
+			//snprintf();change the tab
+			break;
+		case OP_END_LOOP:
+			/*if(debug) {printf("\n[%d] end loop\n", ic);}*/
+			fprintf(cfile, "%c }\n", tab);
+			insideLoop -= 1;
+			break;
+		case OP_NEW_PROC:
+			//fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
+			//writeProctoC(PROGRAM[ic].name);
+			break;
+		case OP_END_PROC:
+			executeproc(PROGRAM[IC].name);
+			fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
+			writeProctoC(PROGRAM[IC].name);
+			fprintf(cfile, "%c}\n",tab);
+			break;
+		case OP_CALL_PROC:
+			if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
+			fprintf(cfile, "%c %c();\n", tab, PROGRAM[ic].name);
+			break;
+		default: return FAILURE;
+
+	}
+}
 void cHeader()
 {
 	if (cfile != NULL){
@@ -434,6 +497,7 @@ int writeToCFile(t_instruction instr, int ic){
 				for(t = 0; t<cnt; t++){
 					fprintf(cfile, "%c printf(\"\%t \%c \\n \",TapeArray[head]);\n",tab);
 				}
+				cnt = 1;
 				break;
 				//I think there is a problem with the reading from the stdin
 			case OP_INPUT:
@@ -441,6 +505,7 @@ int writeToCFile(t_instruction instr, int ic){
 				for(t = 0; t<cnt; t++){
 					fprintf(cfile, "scanf(\"\%d\", TapeArray[head]);\n"); //TK not tested
 				}
+				cnt = 1;
 				break;
 			case OP_LOOP:
 				/*if(debug) {printf("\n[%d] loop\n", ic);}*/
@@ -501,10 +566,6 @@ int writeToCFile(t_instruction instr, int ic){
 		}
 	}
 		oldOperator = newOperator;
-		/*if (debug){
-			int l = sizeof(tab);
-			printf("%d\n", l);
-		}*/
 		return SUCCESS;
  }
 void endCfile(){

@@ -77,3 +77,4 @@ void endCfile();
 int writeProctoC(char procname);
 int compile();
 int translate();
+int LastInstruction(int ic);

@@ -1,29 +1,13 @@
-how do i do it with printf in the c file? how can I print ""? --> \
 
-Idea for more efficiency: make a  variable that changes every case and a poitner that counts the amoint of times we get in the same case.
-after the switch case, we analyse these two and if it changed from the last time I print something in the c file.
-Maybe a additional variable to save the TAPE[HEAD]. because the interpreter changed the tape in the mean time
--> i could compare the old cell value with the new one (in case of add and minus)
--> for printing i need to save data bevore printing  the data --> change -->print (list structure?)
--> the beginning and end of procs need to be directly printed
--> what with loops? -> does something that long until the cell were we are bevor the loop is 0;
-
-
-<<<<<<< HEAD
 issues:
-=======
-issues: 
 
 [ ]check the proc, not shure if it is working that easy
+[ ]the loops are doing strange things I don´t get the correct the result from hello world
 [ ] tab += '/t' ?? snprintf maybe or strcpy, or strncpy(word2,word,strlen(word)-1);
-
->>>>>>> 994f99a8720ac9604fb414f2e28983e83bcda832
-
-[ ]check the proc, not shure if it is working that easy
-[ ] tab += '/t' ?? snprintf maybe or strcpy, or strncpy(word2,word,strlen(word)-1);
-
+[x] the last thing in the programm is "verschnuckt"
 What I did:
 changed the filename in "main" --> achtung bei ihm bei -c und bei -o UND in translate
 deleted my part from "init" and made a new function "cHeader"
 added my functions to the .h file
 added unsigned short oldOperator; --> variable and newOperator;
+the last instruction.
