@@ -1,64 +1,76 @@
 # project analysis of programming language
-Project for the course "Analysis of programming language" at Taltech university 2018
-### By Theresa Kull and Flavien Ronteix--Jacquet de Mehun
+Project for the course *"Analysis of programming language"*, Taltech university :ee: autumn 2018
+***By Theresa Kull*** :de: ***and Flavien Ronteix--Jacquet de Mehun*** :fr:
 
-## Ideas
+### Brainfuck
+https://esolangs.org/wiki/Truth-machine
 
-- (Almost) full functional language
-- We can get some ideas from other language : a list (non-exhaustive) with hello-world example https://github.com/leachim6/hello-world
-- function of iterator point on the value of the last result
-
-### Parse an existing language
-- Real language : LISP or F\#
-- Otherwise : Brainfuck or one of them https://esolangs.org/wiki/Truth-machine
-
-Implementation of  
-- an interpreter
-- a compiler (translate code to C and compile it)
-- visualization tool step by step of what's happen on the tape to help debuging
-- debug mode to output the nodes, the size of used cells in tape,...
-
-Why ?
-- Fully Turing-complete
+**Why you should work with Brainfuck?**
+- Turing-completeness language (https://en.wikipedia.org/wiki/Turing_completeness) then it can be used to simulate any Turing machine : very powerful
 - Help to understand Turing machine
 
 - [Wikipedia link](https://en.wikipedia.org/wiki/Brainfuck)
 - [Esolangs link](https://en.wikipedia.org/wiki/Brainfuck)
-- [Bublesort in bf](http://99-bottles-of-beer.net/language-brainfuck-2542.html)
+- [99 bottles of beer program](http://99-bottles-of-beer.net/language-brainfuck-2542.html)
 - [Examples of programs in bf](http://rosettacode.org/wiki/Category:Brainf***)
 
-## Description of the language
+## Description of the improvements for the language
 
 extension : *.bfa
 
 ### Brainfuck augmented
-- \# : comment line
-- \> : move pointer to the right (ptr++)
-- \< : move pointer to the left (ptr--)
-- \+ : increase value pointed (*ptr++)
-- \- : decrease value pointed (*ptr--)
-- \. : Output cell pointed in stdout (putchar(*ptr))
-- \, : Read use input and put on pointed cell (*ptr = getchar())
-- \[ : block while (while (*ptr){)
-- \] : end block while (})
-- \:A : start new procedure A (void A(ptr){)
-- \; : end procedure
-- Why not function with a new tape. The last value of this tape is returned at the end of function.
-- Builtin functions like convert number to ascii number, add 57 to convert to ascii,...
-- Arguments for the program. Ex ./brainfuck -i test.tf 1 2 3 4 5 will write 1 2 3 4 5 on the first 5 cells of the tape
+- **\#** : comment line [New]
+- **\>** : move pointer to the right cell 
+- **\<** : move pointer to the left cell 
+- **\+** : increase cell's value
+- **\-** : decrease cell's value
+- **\.** : Output cell pointed in stdout
+- **\,** : Read user input and write it on pointed cell 
+- **\[** : loop (if cell's value is different 0 execute loop)
+- **\]** : end block while
+- **\:A** : start new procedure A [NEW]
+- **\;** : end procedure [NEW]
+- **\$** : clean tape [NEW]
 
-## What we need to implement
-- [x] procedure
-- [x] loops
-- [x] conditional statements
-- [x] input
-- [x] output
-- [x] bubble sort or any other example programm
-- [x] comment
+## Use program
 
-## Todo list
-- [x] Write a parser
-- [x] Write an interpreter
-- [ ] Write a compiler
-- [x] Visualization tool
-- [~] Add builtins functions like clear_tape, goto,...
+On UNIX system !
+
+### Requirements
+- Flex
+- Bison
+- Gcc
+
+### Build
+
+Run `./build.sh` to *build* the program (use flex).
+Generate the program (brainfuck-augmented) in build folder
+
+### Run
+
+./build/brainfuck-augmented : run a simple interpreter by default
+
+**Arguments**
+- **-i** : run an interpreter in interactive console
+- **-i filename.bfa** : execute the brainfuck program *filename.bfa*
+- **-d** : enable debug informations
+- **-v** : enable visualization tool of the tape
+- **-c filename.bfa** : translate the brainfuck program *filename.bfa* in C [Not working now]
+- **-o filename.bfa** : compile the brainfuck program *filename.bfa* [Not working now]
+- **-a nbArg arg1 arg2 ... argN** : fill the tape with the *nbArg*
+
+### Interpreter
+
+enter your command, you can have new lines and comments to make your input more readable. To execute, double new line.
+
+### Examples
+
+Brainfuck program examples are in *test* folder
+
+- **beers-song.bfa** : 99 bottles of beer test program (99-bottles-of-beer.net)
+- **condition.bfa** : a condition in brainfuck print 0 if x and y different and 1 if equal
+- **hello-world.bfa** : traditionnal hello world! program
+- **little-sort.bfa** : a sorting program. enter input, 0 to end input and get order value.
+- **mandelbrot.bfa** : (https://github.com/pablojorge/brainfuck/tree/master/programs) compute and print mandelbrot set in brainfuck
+- **multiply.bfa** : a simple multiplication program. enter x and y and print x*y
+- **test-proc.bfa** : a program to test procedures

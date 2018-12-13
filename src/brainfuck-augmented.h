@@ -1,7 +1,7 @@
 //CONSTANT
-#define TAPE_SIZE       1024
-#define STACK_SIZE      512
-#define PROGRAM_SIZE    4096
+#define TAPE_SIZE       4096
+#define STACK_SIZE      2048
+#define PROGRAM_SIZE    16384
 
 #define OP_END          0
 #define OP_MRIGHT       1
