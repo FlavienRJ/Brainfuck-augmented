@@ -16,10 +16,14 @@ int file = 0;
 int compiler = 1;
 int compileObject = 1;
 
-//FRJ - useless for C program. Maybe use a global variable to count the number of \t is a better idea
-int insideLoop = 0; //otherwise the compiler prints the loop too often
-//FRJ - don't understand what is it ?
-char tab = '\t';  //formating the compiled c file
+//for the compiler
+int insideLoop = 0; // otherwise the compiler prints the loop too often
+char tab[15] = {'\t', '\0'};  //formating the compiled c file
+//the wanted optimisation
+unsigned short oldOperator;
+unsigned short newOperator;
+int cnt = 0;
+char filename_C [30];
 
 int TAPE[TAPE_SIZE] = {0};
 int HEAD;
@@ -31,7 +35,7 @@ t_instruction PROGRAM[PROGRAM_SIZE];
 int STACK[STACK_SIZE];
 int SP = 0; //Stack pointer
 t_fn_instruction PROC[STACK_SIZE];
-int PP = 0;
+int PP = 0; //Procedure Pointer
 int inProc = 0; //if 1 then put the instruction in the buffer of the procedure of PROC[PP]
 %}
 
@@ -100,19 +104,26 @@ int main(int argc, char **argv)
 		//compiler
 		else if (!strcmp(argv[i], "-c"))
 		{
-			interpreter = 0;
+			//interpreter = 0;
 			compileObject = 1;
 			if (argv[i+1] != NULL)
 			{
 				strcpy(filename, argv[i+1]); //here we get the filename which I should translate to c
 				file = 1;
-				//open a new file to write code to
-				//cfile = fopen("build/brainfuckInC.c", "w");
-				//strcat(filename, ".c"); not with filename, make a nwe char
-				cfile = fopen("brainfuckInC.c", "w"); // - Maybe compile file filename.c and not this name
-				if (debug){
-					if(cfile == NULL){ printf("error opening a new .c file\n");}
-					else{ printf("successfully opend a new c file\n");}
+				compiler = 1;
+				if (argv[i+1] != NULL)
+				{
+					strcpy(filename, argv[i+1]); //here we get the filename which I should translate to c
+					file = 1;
+					memset(filename_C); //should clear the string
+					strcpy(filename_C,filename);
+					strcat(filename_C, ".c");
+					//open a new file to write code to
+					cfile = fopen(filename_C, "w");
+					if (debug){
+						if(cfile == NULL){ printf("error opening a new .c file\n");}
+						else{ printf("successfully opend a new c file\n");}
+					}
 				}
 			}
 			else
@@ -127,10 +138,12 @@ int main(int argc, char **argv)
 			compiler = 1;
 			if (argv[i+1] != NULL)
 			{
-				strcpy(filename, argv[i+1]); //here we get the filename which I should translate to c
 				file = 1;
+				memset(filename_C);//should clear the string
+				strcpy(filename_C,argv[i+1]);
+				strcat(filename_C, ".c");
 				//open a new file to write code to
-					cfile = fopen("brainfuckInC.c", "w");
+				cfile = fopen(filename_C, "w");
 				//cfile = fopen("build/brainfuckInC.c", "w"); // - Maybe compile file filename.c and not this name
 				if (debug){
 					if(cfile == NULL){ printf("error opening a new .c file\n");}
@@ -188,14 +201,11 @@ int main(int argc, char **argv)
 	}
 
 	if (compiler == 1){
+		cHeader();
 		translate();
+		//compile(); //TFK: here you have to decide which one, I tried with translate
 	}
 
-/*
-	if (compiler == 1){
-		compile();
-	}
-*/
 	return 0;
 }
 
@@ -210,15 +220,21 @@ int translate()
 			return FAILURE;
 		}
 		IC++;
+		//if(visualisation){tape_visualisation(); }
 	}
+	//the last instruction
+	IC--;
+	LastInstruction(IC);
 	endCfile();
 	return SUCCESS;
 }
+
 int compile()
 {
 	translate();
-	//const char* cmd = "gcc build/brainfuckInC.c";
-	const char* cmd = "gcc brainfuckInC.c"; // - change with the right name
+	//const char* cmd = "gcc build/brainfuckInC.c"
+	const char* cmd = "gcc " ; // - change with the right name
+	strcat(cmd, filename_C);
 	if (system(cmd) == -1)
 	{
 		printf("Error during compiling the C file\n");
@@ -229,11 +245,84 @@ void init()
 {
 	HEAD = TAPE_SIZE/2;
 	if(debug) {printf("[Ox%d] : %d\n", &TAPE[HEAD], TAPE[HEAD]);}
-	if(compiler){
-		fprintf(cfile, "#include <stdio.h>\n#include <stdlib.h>\n#include <stdarg.h>\n#include <string.h>\n");
+}
+
+int LastInstruction(int ic){
+	int f;
+	switch (oldOperator) {
+		case OP_MRIGHT:
+			fprintf(cfile, "%s head+=%d;\n", tab, cnt);
+			cnt = 1;
+			break;
+		case OP_MLEFT:
+			fprintf(cfile, "%s head-=%d;\n", tab, cnt);
+			cnt = 1;
+			break;
+		case OP_ADD:
+			fprintf(cfile, "%s TapeArray[head]+=%d;\n", tab, cnt);
+			cnt = 1;
+			break;
+		case OP_MINUS:
+			fprintf(cfile, "%s TapeArray[head]-=%d;\n", tab, cnt);
+			cnt = 1;
+			break;
+		case OP_OUTPUT:
+			for(f = 0; f<cnt; f++){
+				fprintf(cfile, "%s printf(\"\%t \%c \\n \",TapeArray[head]);\n",tab);
+			}
+			break;
+			//I think there is a problem with the reading from the stdin
+		case OP_INPUT:
+			for(f = 0; f<cnt; f++){
+				fprintf(cfile, "%s scanf(\"\%d\", TapeArray[head]);\n", tab); //TK not tested
+			}
+			break;
+		case OP_LOOP:
+			/*if(debug) {printf("\n[%d] loop\n", ic);}*/
+			//fprintf(cfile, "%c i = head;\n", tab);
+			fprintf(cfile, "%s while (TapeArray[head]!=0) {\n",tab);
+			insideLoop++;
+
+			//snprintf();change the tab
+			break;
+		case OP_END_LOOP:
+			/*if(debug) {printf("\n[%d] end loop\n", ic);}*/
+			fprintf(cfile, "%s }\n", tab);
+			insideLoop -= 1;
+			break;
+		case OP_NEW_PROC:
+			//fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
+			//writeProctoC(PROGRAM[ic].name);
+			break;
+		case OP_END_PROC:
+			executeproc(PROGRAM[IC].name);
+			fprintf(cfile, "%s void %c(){\n", tab, PROGRAM[ic].name);
+			writeProctoC(PROGRAM[IC].name);
+			fprintf(cfile, "%s}\n",tab);
+			break;
+		case OP_CALL_PROC:
+			if(debug) {printf("\n[%d] call proc : %s\n", IC, PROGRAM[ic].name);}
+			fprintf(cfile, "%s %s();\n", tab, PROGRAM[ic].name);
+			break;
+		default: return FAILURE;
+
+	}
+}
+void cHeader()
+{
+	if (cfile != NULL){
+		//#include etc is missing to make it c
+		fprintf(cfile,"#include <stdio.h>\n#include <stdlib.h>\n#include <stdarg.h>\n#include <string.h>\n\n");
 		fprintf(cfile, "int TapeArray[%d] = {0};\n", TAPE_SIZE);
-		fprintf(cfile,"int head = %d;\n\n", HEAD); //with out this loops are not working
+		fprintf(cfile,"int head = %d;\n", HEAD);
+		fprintf(cfile, "int i = 0 ;\n\n");
+
+		//print all the declared functions from the proc stack
+		writeProctoC();
+
 		fprintf(cfile, "int main ( int argc, char *argv[] ){\n");
+
+		oldOperator = OP_ADD;
 	}
 }
 
@@ -431,131 +520,139 @@ void endprog()
  //for the compiler and procedures
 int writeProctoC(char procname)
 {
-	int i = 0;
- 	if(debug)
+	if(debug)
  	{
- 		printf("\n[%d] convert proc: %c\n", IC, procname);
- 		int k,l;
- 		for (k = 0; k < PP; k++)
- 		{
- 			printf("procname = %c\n", PROC[k].name);
- 			for (l=0; l < PROC[k].size; l++)
+ 		printf("\n writes procs\n");
+		printf("Amount of prcedures: %d\n", PP );
+	}
+ 	int k = 0;
+	int l = 0;
+	int m = 0;
+ 	for (k = 0; k < PP; k++)
+ 	{
+			m = k+1; //otherwise sebmentation fault
+			if(debug){printf("name: %s size: %d\n",PROC[m].name, PROC[m].size );}
+ 			fprintf(cfile, "void %s(){\n", PROC[m].name);
+			insideLoop++;
+			tab[insideLoop] = '\t';
+			tab[insideLoop+1] = '\0';
+ 			for (l=0; l < PROC[m].size; l++)
  			{
- 				printf ("\tOpcode%d : %d\n",l, PROC[k].PROC_INSTR[l].operator);
+				//erst noch übersetzten bevor ich es ausgebe!
+				writeToCFile(PROC[m].PROC_INSTR[l],IC);
+ 				//printf ("%c %s\n", tab, PROC[m].PROC_INSTR[l].operator);
  			}
- 		}
+			insideLoop--;
+			tab[insideLoop] = '\t';
+			tab[insideLoop+1] = '\0';
+			fprintf(cfile, "}\n\n" );
  	}
- 	i = findProcname(procname);
- 	if( i >= 0)
- 	{
- 		if(debug) {printf("Procedure %c found\n", procname); }
- 		int j;
- 		for (j = 0; j < PROC[i].size; j++)
- 		{
- 			if (writeToCFile(PROC[i].PROC_INSTR[j],j) == FAILURE)
- 			{
- 				printf("Error during execution of instruction [%d] in procedure %c\n",j,PROC[i].name);
- 				return FAILURE;
- 			}
-			else{
-				fprintf(cfile, "\t" );
-			}
-				//if(visualisation){tape_visualisation(); }
- 		}
  		return SUCCESS;
- 	}
- 	printf("Procedure %c does not exist\n",procname);
- 	return FAILURE;
 }
 
 /** writes every intructio into the cfile, similar like executeInstr()**/
 int writeToCFile(t_instruction instr, int ic){
+	newOperator = instr.operator;
+	if(oldOperator != newOperator){
+		int t;
+		switch (oldOperator) {
+			case OP_MRIGHT:
+				fprintf(cfile, "%s head+=%d;\n", tab, cnt);
+				cnt = 1;
+				break;
+			case OP_MLEFT:
+				fprintf(cfile, "%s head-=%d;\n", tab, cnt);
+				cnt = 1;
+				break;
+			case OP_ADD:
+				fprintf(cfile, "%s TapeArray[head]+=%d;\n", tab, cnt);
+				cnt = 1;
+				break;
+			case OP_MINUS:
+				fprintf(cfile, "%s TapeArray[head]-=%d;\n", tab, cnt);
+				cnt = 1;
+				break;
+			case OP_OUTPUT:
+				if(debug) {printf("\n[%d] print\n", ic);}
+				for(t = 0; t<cnt; t++){
+					fprintf(cfile, "%s printf(\"\%t \%c \\n \",TapeArray[head]);\n",tab);
+				}
+				cnt = 1;
+				break;
+				//I think there is a problem with the reading from the stdin
+			case OP_INPUT:
+				if(debug) {printf("\n[%d] read\n", ic);}
+				for(t = 0; t<cnt; t++){
+					fprintf(cfile, "%s scanf(\"\%t \%d\", &TapeArray[head]);\n", tab); //TK not tested
+				}
+				cnt = 1;
+				break;
+			case OP_LOOP:
+				if(debug) {printf("\n[%d] loop\n", ic);}
+				fprintf(cfile, "%s while (TapeArray[head]!=0) {\n",tab);
+				insideLoop++;
+				tab[insideLoop] = '\t';
+				tab[insideLoop+1] = '\0';
+				break;
+			case OP_END_LOOP:
+				if(debug) {printf("\n[%d] end loop\n", ic);}
+				insideLoop -= 1;
+				tab[insideLoop] = '\t';
+				tab[insideLoop+1] = '\0';
+				fprintf(cfile, "%s }\n", tab);
+				break;
+			case OP_NEW_PROC:
+			//already done before the int main
+				break;
+			case OP_END_PROC:
+				break;
+			case OP_CALL_PROC:
+				if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
+				fprintf(cfile, "%s %s();\n", tab, PROGRAM[ic].name);
+				break;
+			default: return FAILURE;
+
+		}
+	}else{
 		switch (instr.operator)
 		{
 			case OP_MRIGHT:
 			/*if(debug) {printf("\n[%d] go right\n", ic);}*/
-				fprintf(cfile, "%c head+=1;\n", tab);
+				cnt++;
 				break;
 			case OP_MLEFT:
-				// - HEAD why do you need head ?
 				/*if(debug) {printf("\n[%d] go left\n", ic);}*/
-				fprintf(cfile, "%c head-=1;\n", tab);
+				cnt++;
 				break;
 			case OP_ADD:
-			 	if(debug) {printf("\n [%d] increase\n", ic);}
-				fprintf(cfile, "%c TapeArray[head]+=1;\n", tab); //optimisation possibility //FRJ - Optimisation necessary
+				//if(debug) {printf("\n [%d] increase\n", ic);}
+				cnt++;
 				break;
 			case OP_MINUS:
-				if(debug) {printf("\n [%d] decrease\n", ic);}
-				fprintf(cfile, "%c TapeArray[head]-=1;\n", tab); //optimisation possibility //FRJ - your if(compiler) is useless
+				//if(debug) {printf("\n [%d] decrease\n", ic);}
+				cnt++;
 				break;
 			case OP_OUTPUT:
-				if(debug) {printf("\n[%d] print\n", ic);}
-				// - Check this, you don't want to print HEAD I think. Also check warnings
-				/*
-				brainfuck-augmented.y:450:40: warning: invalid conversion specifier ' '
-					[-Wformat-invalid-specifier]
-												fprintf(cfile, "%c printf(\"(%d)\%t \%c \\n \",TapeArray[...
-																				~~~^
-				brainfuck-augmented.y:450:63: warning: more '%' conversions than data arguments [-Wformat]
-				...fprintf(cfile, "%c printf(\"(%d)\%t \%c \\n \",TapeArray[%d]);\n",tab,HEAD,HEAD);
-				*/
-				fprintf(cfile, "%cprintf(\"(%d)\%t \%c \\n \",TapeArray[%d]);\n",tab,HEAD,HEAD);
+				cnt++;
 				break;
-			//I think there is a problem with the reading from the stdin
 			case OP_INPUT:
-				if(debug) {printf("\n[%d] read\n", ic);}
-				fprintf(cfile, "scanf(\%d, TapeArray[head]);\n");
-				// - just a scanf() doesn't work ?
+				cnt++;
 				break;
-			case OP_LOOP:
-				/*if(debug) {printf("\n[%d] loop\n", ic);}*/
-				fprintf(cfile, "%c if (!TapeArray[%d] ) {\n",tab, HEAD);
-				//FRJ - and \t for all instruction on it
-				insideLoop++;
-				//snprintf();change the tab
-				break;
-			case OP_END_LOOP:
-				/*if(debug) {printf("\n[%d] end loop\n", ic);}*/
-				fprintf(cfile, "%c }\n", tab);
-				insideLoop -= 1; //FRJ - useless
-				break;
-			case OP_NEW_PROC:
-				if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
-				fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
-				//FRJ - use the number of tab
-				//writeProctoC(PROGRAM[ic].name);
-				break;
-			case OP_END_PROC:
-				writeProctoC(PROGRAM[IC].name);
-				fprintf(cfile, "%c}\n",tab);
-				break;
-			case OP_CALL_PROC:
-				if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
-				fprintf(cfile, "%c %c();\n", tab, PROGRAM[ic].name);
-				break;
-
-			default: return FAILURE;//i don´t have every case, maybe I should add them to not get a FAILURE
 		}
-		/*if (debug){
-			int l = sizeof(tab);
-			printf("%d\n", l);
-		}*/
+	}
+		oldOperator = newOperator;
 		return SUCCESS;
  }
 
-// FRJ - This function is never called. Check why
+//  - This function is never called. Check why
 void endCfile()
 {
-	 if(cfile == NULL)
-	 {
-		 printf("no c file for endinf the c file\n");
+	if(cfile == NULL){
+		printf("no c file for endinf the c file\n");
+	}else{
+		 fprintf(cfile, " return 0; \n }");
+		 fclose(cfile);
 	 }
-	 else
-	 {
-		fprintf(cfile, " return 0; \n }");
-		fclose(cfile);
- 	}
  }
 
 int execute()

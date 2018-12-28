@@ -1,11 +1,14 @@
 
 issues:
 
-[ ]check the proc, not shure if it is working that easy
-[ ] tab += '/t' ?? snprintf maybe or strcpy, or strncpy(word2,word,strlen(word)-1);
+[ ]print procs in the beginning of the file void ... ()
+[ ]check scanf why cant I compile it?
+[ ] -o needs to be checked, I could test it... maybe I am opening two files here
 What I did:
 changed the filename in "main" --> achtung bei ihm bei -c und bei -o UND in translate
 deleted my part from "init" and made a new function "cHeader"
 added my functions to the .h file
 added unsigned short oldOperator; --> variable and newOperator;
 the last instruction.
+writeProctoC.
+tab
