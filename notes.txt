@@ -2,9 +2,7 @@
 issues:
 
 [ ]check the proc, not shure if it is working that easy
-[ ]the loops are doing strange things I don´t get the correct the result from hello world
 [ ] tab += '/t' ?? snprintf maybe or strcpy, or strncpy(word2,word,strlen(word)-1);
-[x] the last thing in the programm is "verschnuckt"
 What I did:
 changed the filename in "main" --> achtung bei ihm bei -c und bei -o UND in translate
 deleted my part from "init" and made a new function "cHeader"

@@ -31,7 +31,7 @@ t_instruction PROGRAM[PROGRAM_SIZE];
 int STACK[STACK_SIZE];
 int SP = 0; //Stack pointer
 t_fn_instruction PROC[STACK_SIZE];
-int PP = 0;
+int PP = 0;  //I guess Prosedure Pointer
 int inProc = 0; //if 1 then put the instruction in the buffer of the procedure of PROC[PP]
 %}
 
@@ -109,7 +109,6 @@ int main(int argc, char **argv)
 				strcat(filename_C, ".c");
 				//open a new file to write code to
 				cfile = fopen(filename_C, "w");
-				cHeader();
 				if (debug){
 					if(cfile == NULL){ printf("error opening a new .c file\n");}
 					else{ printf("successfully opend a new c file\n");}
@@ -166,6 +165,7 @@ int main(int argc, char **argv)
 		execute();
 	}
 	if (compiler == 1){
+		cHeader();
 		compile();
 	}
 	return 0;
@@ -261,7 +261,12 @@ void cHeader()
 		fprintf(cfile, "int TapeArray[%d] = {0};\n", TAPE_SIZE);
 		fprintf(cfile,"int head = %d;\n", HEAD);
 		fprintf(cfile, "int i = 0 ;\n\n");
+
+		//print all the declared functions from the proc stack
+		writeProctoC();
+
 		fprintf(cfile, "int main ( int argc, char *argv[] ){\n");
+
 		oldOperator = OP_ADD;
 	}
 }
@@ -433,43 +438,28 @@ void endprog()
 	PROGRAM[IC].operator = OP_END;
 }
  //for the compiler and procedures
-int writeProctoC(char procname){
-	 int i = 0;
+int writeProctoC(){
  	if(debug)
  	{
- 		printf("\n[%d] executeproc: %c\n", IC, procname);
- 		int k,l;
- 		for (k = 0; k < PP; k++)
- 		{
- 			printf("procname = %c\n", PROC[k].name);
+ 		printf("\n writes procs\n");
+	}
+ 	int k,l;
+ 	for (k = 0; k < PP; k++)
+ 	{
+ 			fprintf(cfile, "void %c(){\n", PROC[k].name);
  			for (l=0; l < PROC[k].size; l++)
  			{
- 				printf ("\tOpcode%d : %d\n",l, PROC[k].PROC_INSTR[l].operator);
+				//erst noch übersetzten bevor ich es ausgebe?
+ 				printf ("%c %s\n", tab, PROC[k].PROC_INSTR[l].operator);//maybe operator nicht
  			}
- 		}
+			fprintf(cfile, "}\n\n" );
  	}
- 	i = findProcname(procname);
- 	if( i >= 0)
- 	{
- 		if(debug) {printf("Procedure %c found\n", procname); }
- 		int j;
- 		for (j = 0; j < PROC[i].size; j++)
- 		{
- 			if (writeToCFile(PROC[i].PROC_INSTR[j],j) == FAILURE)
- 			{
- 				printf("Error during execution of instruction [%d] in procedure %c\n",j,PROC[i].name);
- 				return FAILURE;
- 			}
-			else{
-				fprintf(cfile, "\t" );
-			}
-				//if(visualisation){tape_visualisation(); }
- 		}
+		//if(visualisation){tape_visualisation(); }
  		return SUCCESS;
- 	}
- 	printf("Procedure %c does not exist\n",procname);
- 	return FAILURE;
- }
+		//return FAILURE;
+}
+
+
 /** writes every intructio into the cfile, similar like executeInstr()**/
 int writeToCFile(t_instruction instr, int ic){
 	newOperator = instr.operator;
@@ -503,7 +493,7 @@ int writeToCFile(t_instruction instr, int ic){
 			case OP_INPUT:
 				if(debug) {printf("\n[%d] read\n", ic);}
 				for(t = 0; t<cnt; t++){
-					fprintf(cfile, "scanf(\"\%d\", TapeArray[head]);\n"); //TK not tested
+					fprintf(cfile, "%c scanf(\"\%t \%d\",TapeArray[head]);\n", tab); //TK not tested
 				}
 				cnt = 1;
 				break;
@@ -512,7 +502,6 @@ int writeToCFile(t_instruction instr, int ic){
 				//fprintf(cfile, "%c i = head;\n", tab);
 				fprintf(cfile, "%c while (TapeArray[head]!=0) {\n",tab);
 				insideLoop++;
-
 				//snprintf();change the tab
 				break;
 			case OP_END_LOOP:
@@ -521,15 +510,15 @@ int writeToCFile(t_instruction instr, int ic){
 				insideLoop -= 1;
 				break;
 			case OP_NEW_PROC:
-				if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
+				/*if(debug) {printf("\n[%d] new proc : %c\n", ic, PROGRAM[ic].name);}
+				fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);*/
 				//fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
 				//writeProctoC(PROGRAM[ic].name);
 				break;
 			case OP_END_PROC:
-				executeproc(PROGRAM[IC].name);
-				fprintf(cfile, "%c void %c(){\n", tab, PROGRAM[ic].name);
-				writeProctoC(PROGRAM[IC].name);
-				fprintf(cfile, "%c}\n",tab);
+				//executeproc(PROGRAM[IC].name);never execute
+				/*writeProctoC(PROGRAM[IC].name);
+				fprintf(cfile, "%c}\n",tab);*/
 				break;
 			case OP_CALL_PROC:
 				if(debug) {printf("\n[%d] call proc : %c\n", IC, PROGRAM[ic].name);}
